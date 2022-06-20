@@ -18,6 +18,7 @@ public class GenerateRestEndpointsProcessor extends MagicClassProcessor {
             try {
                 var gen = new EntityRestResourceGenerator(element);
                 this.writeTypeFile(element.getPackageName(), gen.generateSingleResource());
+                this.writeTypeFile(element.getPackageName(), gen.generateAllResource());
             } catch (IOException ex) {
                 throw new IllegalStateException(ex);
             }
