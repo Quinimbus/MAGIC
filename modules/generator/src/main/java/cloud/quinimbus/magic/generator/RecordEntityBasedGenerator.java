@@ -1,6 +1,7 @@
 package cloud.quinimbus.magic.generator;
 
 import cloud.quinimbus.magic.elements.MagicClassElement;
+import java.util.Locale;
 import javax.lang.model.type.TypeMirror;
 
 public abstract class RecordEntityBasedGenerator {
@@ -16,9 +17,13 @@ public abstract class RecordEntityBasedGenerator {
         this.packageName = recordElement.getPackageName();
         this.idType = recordElement.findFieldsAnnotatedWith("cloud.quinimbus.persistence.api.annotation.EntityIdField")
                 .findFirst()
-                .map(e -> e.asType())
+                .map(e -> e.getElement().asType())
                 .orElseThrow(() ->
                         new IllegalArgumentException("Cannot find EntityIdField on any record field of record " + name));
         
+    }
+    
+    static String capitalize(String str) {
+        return str.substring(0, 1).toUpperCase(Locale.US).concat(str.substring(1));
     }
 }

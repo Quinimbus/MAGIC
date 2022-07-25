@@ -30,16 +30,15 @@ public class MagicClassElement implements NamedType {
         return this.processingEnvironment.getElementUtils().getPackageOf(this.element).toString();
     }
 
-    public Stream<VariableElement> findFields() {
+    public Stream<MagicVariableElement> findFields() {
         return this.element.getEnclosedElements().stream()
                 .filter(e -> e.getKind().equals(ElementKind.FIELD))
-                .map(e -> (VariableElement) e);
+                .map(e -> (VariableElement) e)
+                .map(e -> new MagicVariableElement(e, this.processingEnvironment));
     }
 
-    public Stream<VariableElement> findFieldsAnnotatedWith(String annotationName) {
+    public Stream<MagicVariableElement> findFieldsAnnotatedWith(String annotationName) {
         return this.findFields()
-                .filter(e -> e.getAnnotationMirrors().stream()
-                        .map(a -> new MagicAnnotationElement(a, this.processingEnvironment))
-                        .anyMatch(a -> a.getName().equals(annotationName)));
+                .filter(e -> e.isAnnotatedWith(annotationName));
     }
 }

@@ -8,7 +8,6 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import java.util.Locale;
 import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
 
@@ -33,18 +32,14 @@ public class RepositoryGenerator extends RecordEntityBasedGenerator {
         recordElement.findFieldsAnnotatedWith("cloud.quinimbus.persistence.api.annotation.Searchable")
                 .forEach(ve -> {
                     repositoryTypeBuilder.addMethod(
-                            MethodSpec.methodBuilder("findAllBy%s".formatted(capitalize(ve.getSimpleName().toString())))
+                            MethodSpec.methodBuilder("findAllBy%s".formatted(capitalize(ve.getSimpleName())))
                                     .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                    .addParameter(TypeName.get(ve.asType()), "value")
+                                    .addParameter(TypeName.get(ve.getElement().asType()), "value")
                                     .returns(ParameterizedTypeName.get(
                                             ClassName.get(Stream.class),
                                             ClassName.get(packageName, name)))
                                     .build());
                 });
         return repositoryTypeBuilder.build();
-    }
-    
-    private static String capitalize(String str) {
-        return str.substring(0, 1).toUpperCase(Locale.US).concat(str.substring(1));
     }
 }
