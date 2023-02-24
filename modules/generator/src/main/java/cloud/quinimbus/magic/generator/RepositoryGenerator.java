@@ -1,5 +1,6 @@
 package cloud.quinimbus.magic.generator;
 
+import cloud.quinimbus.magic.classnames.QuiNimbusPersistence;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
@@ -20,15 +21,14 @@ public class RepositoryGenerator extends RecordEntityBasedGenerator {
     public TypeSpec generateRepositoryType() {
         var repositoryTypeBuilder = TypeSpec.interfaceBuilder(name + "Repository")
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(AnnotationSpec.builder(ClassName
-                        .get("cloud.quinimbus.persistence.api.annotation", "EntityTypeClass"))
+                .addAnnotation(AnnotationSpec.builder(QuiNimbusPersistence.ENTITY_TYPE_CLASS)
                         .addMember("value", CodeBlock.of("$L.class", name))
                         .build())
                 .addSuperinterface(
                         ParameterizedTypeName.get(
-                                ClassName.get("cloud.quinimbus.persistence.repositories", "CRUDRepository"),
-                                ClassName.get(packageName, name),
-                                ClassName.get(idType)));
+                                QuiNimbusPersistence.CRUD_REPOSITORY,
+                                entityTypeName(),
+                                idTypeName()));
         recordElement.findFieldsAnnotatedWith("cloud.quinimbus.persistence.api.annotation.Searchable")
                 .forEach(ve -> {
                     repositoryTypeBuilder.addMethod(
@@ -37,7 +37,7 @@ public class RepositoryGenerator extends RecordEntityBasedGenerator {
                                     .addParameter(TypeName.get(ve.getElement().asType()), "value")
                                     .returns(ParameterizedTypeName.get(
                                             ClassName.get(Stream.class),
-                                            ClassName.get(packageName, name)))
+                                            entityTypeName()))
                                     .build());
                 });
         return repositoryTypeBuilder.build();

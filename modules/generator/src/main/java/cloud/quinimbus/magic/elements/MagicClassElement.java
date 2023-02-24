@@ -41,4 +41,11 @@ public class MagicClassElement implements NamedType {
         return this.findFields()
                 .filter(e -> e.isAnnotatedWith(annotationName));
     }
+
+    @Override
+    public String toString() {
+        return "MagicClassElement(%s)".formatted(this.element);
+    }
+    
+    
 }

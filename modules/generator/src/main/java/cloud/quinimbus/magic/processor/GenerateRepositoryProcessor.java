@@ -16,6 +16,7 @@ import javax.lang.model.element.TypeElement;
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 public class GenerateRepositoryProcessor extends MagicClassProcessor {
 
+    @Override
     public void process(TypeElement annotation, MagicClassElement element) {
         if (annotation.getSimpleName().contentEquals("GenerateRepository")) {
             try {

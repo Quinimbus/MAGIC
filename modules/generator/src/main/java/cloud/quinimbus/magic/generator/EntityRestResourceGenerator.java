@@ -2,6 +2,8 @@ package cloud.quinimbus.magic.generator;
 
 import cloud.quinimbus.common.tools.IDs;
 import cloud.quinimbus.common.tools.Records;
+import cloud.quinimbus.magic.classnames.Javax;
+import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
 import com.squareup.javapoet.AnnotationSpec;
@@ -24,16 +26,16 @@ public class EntityRestResourceGenerator extends RecordEntityBasedGenerator {
         var singleResourceTypeBuilder = TypeSpec.classBuilder(name + "SingleResource")
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(ParameterizedTypeName.get(
-                        ClassName.get("cloud.quinimbus.rest.crud", "AbstractCrudSingleResource"),
-                        ClassName.get(packageName, name),
-                        ClassName.get(idType)))
-                .addAnnotation(ClassName.get("javax.enterprise.context", "RequestScoped"))
-                .addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Path"))
+                        QuiNimbusRest.ABSTRACT_CRUD_SINGLE_RESOURCE,
+                        entityTypeName(),
+                        idTypeName()))
+                .addAnnotation(Javax.REQUEST_SCOPED)
+                .addAnnotation(AnnotationSpec.builder(Javax.RS_PATH)
                         .addMember("value", "\"%s/{entityid}\"".formatted(Records.idFromType(recordElement)))
                         .build())
                 .addMethod(MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PUBLIC)
-                        .addAnnotation(ClassName.get("javax.inject", "Inject"))
+                        .addAnnotation(Javax.INJECT)
                         .addParameter(ParameterSpec
                                 .builder(ClassName.get(packageName, name + "Repository"), "repository")
                                 .build())
@@ -46,18 +48,18 @@ public class EntityRestResourceGenerator extends RecordEntityBasedGenerator {
         var allResourceTypeBuilder = TypeSpec.classBuilder(name + "AllResource")
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(ParameterizedTypeName.get(
-                        ClassName.get("cloud.quinimbus.rest.crud", "AbstractCrudAllResource"),
-                        ClassName.get(packageName, name),
-                        ClassName.get(idType)))
-                .addAnnotation(ClassName.get("javax.enterprise.context", "RequestScoped"))
-                .addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Path"))
+                        QuiNimbusRest.ABSTRACT_CRUD_ALL_RESOURCE,
+                        entityTypeName(),
+                        idTypeName()))
+                .addAnnotation(Javax.REQUEST_SCOPED)
+                .addAnnotation(AnnotationSpec.builder(Javax.RS_PATH)
                         .addMember("value", "\"%s\"".formatted(IDs.toPlural(Records.idFromType(recordElement))))
                         .build())
                 .addField(FieldSpec.builder(repository(), "repository", Modifier.PRIVATE, Modifier.FINAL)
                         .build())
                 .addMethod(MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PUBLIC)
-                        .addAnnotation(ClassName.get("javax.inject", "Inject"))
+                        .addAnnotation(Javax.INJECT)
                         .addParameter(ParameterSpec
                                 .builder(repository(), "repository")
                                 .build())
@@ -75,23 +77,23 @@ public class EntityRestResourceGenerator extends RecordEntityBasedGenerator {
     private void createByPropertyEndpoint(TypeSpec.Builder builder, MagicVariableElement ve) {
         builder.addMethod(MethodSpec.methodBuilder("by%s".formatted(capitalize(ve.getSimpleName())))
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "GET"))
+                .addAnnotation(AnnotationSpec.builder(Javax.RS_GET)
                         .build())
-                .addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Path"))
+                .addAnnotation(AnnotationSpec.builder(Javax.RS_PATH)
                         .addMember("value", "\"/by/%s/{%s}\"".formatted(ve.getSimpleName(), ve.getSimpleName()))
                         .build())
-                .addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Produces"))
+                .addAnnotation(AnnotationSpec.builder(Javax.RS_PRODUCES)
                         .addMember("value", CodeBlock.builder()
-                                .add("$T.APPLICATION_JSON", ClassName.get("javax.ws.rs.core", "MediaType"))
+                                .add("$T.APPLICATION_JSON", Javax.RS_MEDIATYPE)
                                 .build())
                         .build())
                 .addParameter(ParameterSpec
                         .builder(ClassName.get(ve.getElement().asType()), ve.getSimpleName())
-                        .addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "PathParam"))
+                        .addAnnotation(AnnotationSpec.builder(Javax.RS_PATH_PARAM)
                                 .addMember("value", "\"%s\"".formatted(ve.getSimpleName()))
                                 .build())
                         .build())
-                .returns(ClassName.get("javax.ws.rs.core", "Response"))
+                .returns(Javax.RS_RESPONSE)
                 .addCode("""
                          return this.getByProperty(%s, this.repository::findAllBy%s);
                          """
