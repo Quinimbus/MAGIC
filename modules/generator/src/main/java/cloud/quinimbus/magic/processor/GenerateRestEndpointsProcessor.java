@@ -17,8 +17,8 @@ public class GenerateRestEndpointsProcessor extends MagicClassProcessor {
         if (annotation.getSimpleName().contentEquals("GenerateRestEndpoints")) {
             try {
                 var gen = new EntityRestResourceGenerator(element);
-                this.writeTypeFile(element.getPackageName(), gen.generateSingleResource());
-                this.writeTypeFile(element.getPackageName(), gen.generateAllResource());
+                this.writeTypeFile(gen.generateSingleResource());
+                this.writeTypeFile(gen.generateAllResource());
             } catch (IOException ex) {
                 throw new IllegalStateException(ex);
             }

@@ -1,6 +1,7 @@
 package cloud.quinimbus.magic.processor;
 
 import cloud.quinimbus.magic.elements.MagicClassElement;
+import cloud.quinimbus.magic.spec.MagicTypeSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import java.io.IOException;
@@ -29,6 +30,10 @@ public abstract class MagicClassProcessor extends AbstractProcessor {
     public abstract void process(TypeElement annotation, MagicClassElement element);
 
     public abstract void afterProcessAll(TypeElement annotation, Set<MagicClassElement> elements);
+
+    public void writeTypeFile(MagicTypeSpec type) throws IOException {
+        this.writeTypeFile(type.getPackageName(), type.getTypeSpec());
+    }
 
     public void writeTypeFile(String packageName, TypeSpec type) throws IOException {
         var file = JavaFile.builder(packageName, type)

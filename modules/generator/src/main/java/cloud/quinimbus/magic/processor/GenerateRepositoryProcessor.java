@@ -21,7 +21,7 @@ public class GenerateRepositoryProcessor extends MagicClassProcessor {
         if (annotation.getSimpleName().contentEquals("GenerateRepository")) {
             try {
                 var gen = new RepositoryGenerator(element);
-                this.writeTypeFile(element.getPackageName(), gen.generateRepositoryType());
+                this.writeTypeFile(gen.generateRepositoryType());
             } catch (IOException ex) {
                 throw new IllegalStateException(ex);
             }

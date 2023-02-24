@@ -6,6 +6,7 @@ import cloud.quinimbus.magic.classnames.Javax;
 import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
+import cloud.quinimbus.magic.spec.MagicTypeSpec;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -22,7 +23,7 @@ public class EntityRestResourceGenerator extends RecordEntityBasedGenerator {
         super(recordElement);
     }
 
-    public TypeSpec generateSingleResource() {
+    public MagicTypeSpec generateSingleResource() {
         var singleResourceTypeBuilder = TypeSpec.classBuilder(name + "SingleResource")
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(ParameterizedTypeName.get(
@@ -41,10 +42,10 @@ public class EntityRestResourceGenerator extends RecordEntityBasedGenerator {
                                 .build())
                         .addCode("super(repository);")
                         .build());
-        return singleResourceTypeBuilder.build();
+        return new MagicTypeSpec(singleResourceTypeBuilder.build(), packageName);
     }
 
-    public TypeSpec generateAllResource() {
+    public MagicTypeSpec generateAllResource() {
         var allResourceTypeBuilder = TypeSpec.classBuilder(name + "AllResource")
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(ParameterizedTypeName.get(
@@ -71,7 +72,7 @@ public class EntityRestResourceGenerator extends RecordEntityBasedGenerator {
         this.recordElement.findFieldsAnnotatedWith("cloud.quinimbus.persistence.api.annotation.Searchable")
                 .filter(ve -> ve.isClass(String.class))
                 .forEach(ve -> createByPropertyEndpoint(allResourceTypeBuilder, ve));
-        return allResourceTypeBuilder.build();
+        return new MagicTypeSpec(allResourceTypeBuilder.build(), packageName);
     }
 
     private void createByPropertyEndpoint(TypeSpec.Builder builder, MagicVariableElement ve) {
