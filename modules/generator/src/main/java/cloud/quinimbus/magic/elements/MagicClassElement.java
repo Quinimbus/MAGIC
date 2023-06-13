@@ -1,29 +1,20 @@
 package cloud.quinimbus.magic.elements;
 
-import cloud.quinimbus.common.tools.NamedType;
 import java.util.stream.Stream;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
-public class MagicClassElement implements NamedType {
+public class MagicClassElement extends AbstractMagicElementWrapper<TypeElement> {
 
     private final TypeElement element;
     private final ProcessingEnvironment processingEnvironment;
 
     public MagicClassElement(TypeElement element, ProcessingEnvironment processingEnvironment) {
+        super(element, processingEnvironment);
         this.element = element;
         this.processingEnvironment = processingEnvironment;
-    }
-
-    public TypeElement getElement() {
-        return this.element;
-    }
-    
-    @Override
-    public String getSimpleName() {
-        return this.element.getSimpleName().toString();
     }
     
     public String getPackageName() {
@@ -41,11 +32,4 @@ public class MagicClassElement implements NamedType {
         return this.findFields()
                 .filter(e -> e.isAnnotatedWith(annotationName));
     }
-
-    @Override
-    public String toString() {
-        return "MagicClassElement(%s)".formatted(this.element);
-    }
-    
-    
 }

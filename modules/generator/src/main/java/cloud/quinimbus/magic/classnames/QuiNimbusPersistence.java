@@ -6,5 +6,7 @@ public class QuiNimbusPersistence {
     
     public static final ClassName CRUD_REPOSITORY = ClassName.get("cloud.quinimbus.persistence.repositories", "CRUDRepository");
     
+    public static final ClassName WEAK_CRUD_REPOSITORY = ClassName.get("cloud.quinimbus.persistence.repositories", "WeakCRUDRepository");
+    
     public static final ClassName ENTITY_TYPE_CLASS = ClassName.get("cloud.quinimbus.persistence.api.annotation", "EntityTypeClass");
 }

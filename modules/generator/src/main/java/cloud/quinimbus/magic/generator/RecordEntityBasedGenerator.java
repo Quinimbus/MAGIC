@@ -1,5 +1,7 @@
 package cloud.quinimbus.magic.generator;
 
+import cloud.quinimbus.magic.classnames.QuiNimbusCommon;
+import cloud.quinimbus.magic.elements.MagicAnnotationElement;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
@@ -12,6 +14,7 @@ public abstract class RecordEntityBasedGenerator {
     final String name;
     final String packageName;
     final TypeMirror idType;
+    final TypeMirror owningType;
 
     RecordEntityBasedGenerator(MagicClassElement recordElement) {
         this.recordElement = recordElement;
@@ -22,7 +25,11 @@ public abstract class RecordEntityBasedGenerator {
                 .map(e -> e.getElement().asType())
                 .orElseThrow(() ->
                         new IllegalArgumentException("Cannot find EntityIdField on any record field of record " + name));
-        
+        this.owningType = recordElement
+                .findAnnotation(QuiNimbusCommon.OWNER_ANNOTATION_NAME)
+                .flatMap(a -> a.getElementValue("owningEntity").map(MagicClassElement.class::cast))
+                .map(e -> e.getElement().asType())
+                .orElse(null);
     }
     
     static String capitalize(String str) {
@@ -35,5 +42,13 @@ public abstract class RecordEntityBasedGenerator {
     
     TypeName idTypeName() {
         return ClassName.get(idType);
+    }
+    
+    boolean weak() {
+        return owningType != null;
+    }
+    
+    TypeName owningTypeName() {
+        return ClassName.get(owningType);
     }
 }

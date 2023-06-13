@@ -1,7 +1,11 @@
 package cloud.quinimbus.magic.elements;
 
+import java.util.Map;
+import java.util.Optional;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 
 public class MagicAnnotationElement {
 
@@ -28,5 +32,18 @@ public class MagicAnnotationElement {
     
     public String getName() {
         return "%s.%s".formatted(this.getPackageName(), this.getSimpleName());
+    }
+    
+    public <T> Optional<T> getElementValue(String elementName) {
+        return this.processingEnvironment.getElementUtils().getElementValuesWithDefaults(this.annotationMirror).entrySet().stream()
+                .filter(e -> e.getKey().getSimpleName().toString().equals(elementName))
+                .map(Map.Entry::getValue)
+                .map(e -> {
+                    if (e.getValue() instanceof DeclaredType type) {
+                        return (T) new MagicClassElement((TypeElement) type.asElement(), processingEnvironment);
+                    }
+                    return (T)e;
+                })
+                .findFirst();
     }
 }
