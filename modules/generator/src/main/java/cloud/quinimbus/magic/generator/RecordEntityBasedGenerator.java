@@ -1,7 +1,6 @@
 package cloud.quinimbus.magic.generator;
 
 import cloud.quinimbus.magic.classnames.QuiNimbusCommon;
-import cloud.quinimbus.magic.elements.MagicAnnotationElement;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
@@ -34,6 +33,17 @@ public abstract class RecordEntityBasedGenerator {
     
     static String capitalize(String str) {
         return str.substring(0, 1).toUpperCase(Locale.US).concat(str.substring(1));
+    }
+    
+    static String uncapitalize(String str) {
+        return str.substring(0, 1).toLowerCase(Locale.US).concat(str.substring(1));
+    }
+    
+    public String relativizeToName(String str) {
+        if (str.startsWith(name)) {
+            return str.substring(name.length());
+        }
+        return str;
     }
     
     TypeName entityTypeName() {

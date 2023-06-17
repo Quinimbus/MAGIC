@@ -1,5 +1,6 @@
 package cloud.quinimbus.magic.elements;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ElementKind;
@@ -31,5 +32,20 @@ public class MagicClassElement extends AbstractMagicElementWrapper<TypeElement> 
     public Stream<MagicVariableElement> findFieldsAnnotatedWith(String annotationName) {
         return this.findFields()
                 .filter(e -> e.isAnnotatedWith(annotationName));
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof MagicClassElement otherElement) {
+            return element.equals(otherElement.element);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 59 * hash + Objects.hashCode(this.element);
+        return hash;
     }
 }

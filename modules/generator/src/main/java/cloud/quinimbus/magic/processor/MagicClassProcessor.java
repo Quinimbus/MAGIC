@@ -21,16 +21,19 @@ public abstract class MagicClassProcessor extends AbstractProcessor {
                     .filter(element -> element instanceof TypeElement)
                     .map(element -> new MagicClassElement((TypeElement) element, this.processingEnv))
                     .collect(Collectors.toSet());
+            beforeProcessAll(annotation, elements);
             elements.forEach(element -> process(annotation, element));
             afterProcessAll(annotation, elements);
         });
         return false;
     }
+    
+    public abstract void beforeProcessAll(TypeElement annotation, Set<MagicClassElement> elements);
 
     public abstract void process(TypeElement annotation, MagicClassElement element);
 
     public abstract void afterProcessAll(TypeElement annotation, Set<MagicClassElement> elements);
-
+    
     public void writeTypeFile(MagicTypeSpec type) throws IOException {
         this.writeTypeFile(type.getPackageName(), type.getTypeSpec());
     }

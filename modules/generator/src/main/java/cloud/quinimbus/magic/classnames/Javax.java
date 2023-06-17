@@ -8,6 +8,8 @@ public class Javax {
     
     public static final ClassName REQUEST_SCOPED = ClassName.get("javax.enterprise.context", "RequestScoped");
     
+    public static final ClassName RS_CONTEXT = ClassName.get("javax.ws.rs.core", "Context");
+    
     public static final ClassName RS_GET = ClassName.get("javax.ws.rs", "GET");
     
     public static final ClassName RS_MEDIATYPE = ClassName.get("javax.ws.rs.core", "MediaType");
@@ -19,4 +21,6 @@ public class Javax {
     public static final ClassName RS_PRODUCES = ClassName.get("javax.ws.rs", "Produces");
     
     public static final ClassName RS_RESPONSE = ClassName.get("javax.ws.rs.core", "Response");
+    
+    public static final ClassName RS_URIINFO = ClassName.get("javax.ws.rs.core", "UriInfo");
 }

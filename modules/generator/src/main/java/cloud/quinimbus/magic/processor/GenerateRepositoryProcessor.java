@@ -17,6 +17,10 @@ import javax.lang.model.element.TypeElement;
 public class GenerateRepositoryProcessor extends MagicClassProcessor {
 
     @Override
+    public void beforeProcessAll(TypeElement annotation, Set<MagicClassElement> elements) {
+    }
+
+    @Override
     public void process(TypeElement annotation, MagicClassElement element) {
         if (annotation.getSimpleName().contentEquals("GenerateRepository")) {
             try {
@@ -40,7 +44,7 @@ public class GenerateRepositoryProcessor extends MagicClassProcessor {
             }
         }
     }
-    
+
     public String commonPackageName(String pn1, String pn2) {
         int i = 0;
         var pna1 = pn1.split("\\.");
