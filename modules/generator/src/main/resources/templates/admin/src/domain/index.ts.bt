@@ -1,0 +1,7 @@
+{{for type in types}}import { {{type.nameLC}}Definition } from './{{type.nameUC}}'
+{{end}}
+{{for type in types}}export { type {{type.nameUC}}, {{type.nameLC}}Definition } from './{{type.nameUC}}'
+{{end}}
+const entityTypeDefinitions = [{{for index, type in types}}{{if index != 0}}, {{end}}{{type.nameLC}}Definition{{end}}]
+
+export default entityTypeDefinitions

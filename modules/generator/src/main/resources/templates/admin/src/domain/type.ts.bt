@@ -1,0 +1,25 @@
+import { FieldType, type TypeDefinition } from '@/qn/types/entities'
+import {{typeNameLCPlural}}View from '@/views/{{typeNameUCPlural}}ListView.vue'
+
+export type {{typeNameUC}} = {
+    {{for field in fields}}
+    {{field.name}}: {{field.type}}{{end}}
+}
+
+const {{typeNameLC}}Definition: TypeDefinition = {
+    fields: [{{for field in fields}}
+        {
+            key: "{{field.name}}",
+            label: "{{field.label}}",
+            type: FieldType.{{field.fieldType}}
+        },{{end}}
+    ],
+    icon: "{{icon}}",
+    key: "{{typeNameLC}}",
+    keyPlural: "{{typeNameLCPlural}}",
+    labelSingular: "{{labelSingular}}",
+    labelPlural: "{{labelPlural}}",
+    listView: {{typeNameLCPlural}}View
+}
+
+export { {{typeNameLC}}Definition }

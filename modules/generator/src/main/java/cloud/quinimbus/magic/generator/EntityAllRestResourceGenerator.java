@@ -7,7 +7,7 @@ import cloud.quinimbus.magic.classnames.Javax;
 import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
-import static cloud.quinimbus.magic.generator.RecordEntityBasedGenerator.capitalize;
+import static cloud.quinimbus.magic.util.Strings.*;
 import cloud.quinimbus.magic.spec.MagicTypeSpec;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;

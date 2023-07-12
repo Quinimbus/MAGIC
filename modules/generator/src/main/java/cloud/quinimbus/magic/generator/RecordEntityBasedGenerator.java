@@ -4,7 +4,6 @@ import cloud.quinimbus.magic.classnames.QuiNimbusCommon;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
-import java.util.Locale;
 import javax.lang.model.type.TypeMirror;
 
 public abstract class RecordEntityBasedGenerator {
@@ -29,14 +28,6 @@ public abstract class RecordEntityBasedGenerator {
                 .flatMap(a -> a.getElementValue("owningEntity").map(MagicClassElement.class::cast))
                 .map(e -> e.getElement().asType())
                 .orElse(null);
-    }
-    
-    static String capitalize(String str) {
-        return str.substring(0, 1).toUpperCase(Locale.US).concat(str.substring(1));
-    }
-    
-    static String uncapitalize(String str) {
-        return str.substring(0, 1).toLowerCase(Locale.US).concat(str.substring(1));
     }
     
     public String relativizeToName(String str) {
