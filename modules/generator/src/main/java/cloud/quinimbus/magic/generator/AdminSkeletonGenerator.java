@@ -6,7 +6,6 @@ import io.marioslab.basis.template.TemplateContext;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 
 public class AdminSkeletonGenerator {
     
@@ -82,7 +81,7 @@ public class AdminSkeletonGenerator {
     }
     
     private void copyFile(String path) {
-        try (var outputStream = Files.newOutputStream(adminUiPath.resolve(path), StandardOpenOption.CREATE_NEW, StandardOpenOption.TRUNCATE_EXISTING);
+        try (var outputStream = Files.newOutputStream(adminUiPath.resolve(path));
             var inputStream = getClass().getResourceAsStream("/static/admin/%s".formatted(path))) {
             inputStream.transferTo(outputStream);
         } catch (IOException ex) {

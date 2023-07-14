@@ -49,9 +49,9 @@ public class GenerateAdminListViewProcessor extends MagicClassProcessor {
     public void process(TypeElement annotation, MagicClassElement element) {
         try {
             var domainPath = srcPath.resolve("domain");
-            Files.createDirectory(domainPath);
+            Files.createDirectories(domainPath);
             var viewsPath = srcPath.resolve("views");
-            Files.createDirectory(viewsPath);
+            Files.createDirectories(viewsPath);
             var typegen = new AdminListViewTypeGenerator(element, domainPath, config);
             typegen.generateType();
             var viewgen = new AdminListViewGenerator(element, viewsPath);

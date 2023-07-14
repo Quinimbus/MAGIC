@@ -5,7 +5,6 @@ import io.marioslab.basis.template.TemplateLoader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 
 public class TemplateRenderer {
     
@@ -20,7 +19,7 @@ public class TemplateRenderer {
     }
     
     public void generateFromTemplate(String templatePath, String resultPath, TemplateContext context) {
-        try (var outputStream = Files.newOutputStream(targetPath.resolve(resultPath), StandardOpenOption.CREATE_NEW, StandardOpenOption.TRUNCATE_EXISTING)) {
+        try (var outputStream = Files.newOutputStream(targetPath.resolve(resultPath))) {
             var loader = new TemplateLoader.ClasspathTemplateLoader();
             var template = loader.load("/templates/admin/%s.bt".formatted(templatePath));
             template.render(context, outputStream);
