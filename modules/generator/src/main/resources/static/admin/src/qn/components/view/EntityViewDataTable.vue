@@ -36,7 +36,7 @@ const deleteItem = (item: Object) => {
 <template>
     <v-data-table :headers="headers" :items="items" :search="search">
         <template v-slot:[`item.actions`]="{ item }">
-            <EntityEditDialog :type="type">
+            <EntityEditDialog :type="type" v-model="item.raw">
                 <template #activator="{ props }">
                     <v-icon v-bind="props" icon="mdi-pencil" size="small" class="me-2" @click="editItem(item.raw)" />
                 </template>

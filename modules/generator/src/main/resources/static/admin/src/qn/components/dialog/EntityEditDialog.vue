@@ -7,9 +7,15 @@ defineProps({
     type: {
         type: Object as PropType<TypeDefinition>,
         required: true
+    },
+    modelValue: {
+        type: Object,
+        required: true
     }
 })
-
+defineEmits<{
+    (e: "update:model-value", modelValue: string): void
+}>()
 defineSlots<{
     activator(props: Record<string, any>): any
 }>()
@@ -24,7 +30,7 @@ const open = ref(false)
         <v-card>
             <v-card-title>{{ type.labelSingular }} bearbeiten</v-card-title>
             <v-card-text>
-                <EntityForm :fields="type.fields" />
+                <EntityForm :fields="type.fields" :model-value="modelValue" @update:model-value="['onUpdate:model-value']" />
             </v-card-text>
             <v-card-actions>
                 <v-spacer />
