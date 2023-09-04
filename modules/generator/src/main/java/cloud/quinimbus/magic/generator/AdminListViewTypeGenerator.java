@@ -75,6 +75,8 @@ public class AdminListViewTypeGenerator extends RecordEntityBasedGenerator {
         return switch (parsedType.type()) {
             case "java.lang.String" -> "STRING";
             case "java.lang.Integer" -> "NUMBER";
+            case "java.time.LocalDate" -> "LOCALDATE";
+            case "java.time.LocalDateTime" -> "LOCALDATETIME";
             default -> "UNKNOWN";
         };
     }

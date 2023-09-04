@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { StringField, NumberField } from '@/qn/components/form';
+import { DateField, DateTimeField, NumberField, StringField } from '@/qn/components/form';
 import { type Field, FieldType } from '@/qn/types/entities'
 import type { PropType } from 'vue';
 defineProps({
@@ -27,6 +27,16 @@ defineEmits<{
                 @update:model-value="['onUpdate:model-value']" />
             <NumberField
                 v-else-if="field.type === FieldType.NUMBER"
+                :field="field"
+                :model-value="modelValue[field.key]"
+                @update:model-value="['onUpdate:model-value']" />
+            <DateField
+                v-else-if="field.type === FieldType.LOCALDATE"
+                :field="field"
+                :model-value="modelValue[field.key]"
+                @update:model-value="['onUpdate:model-value']" />
+            <DateTimeField
+                v-else-if="field.type === FieldType.LOCALDATETIME"
                 :field="field"
                 :model-value="modelValue[field.key]"
                 @update:model-value="['onUpdate:model-value']" />

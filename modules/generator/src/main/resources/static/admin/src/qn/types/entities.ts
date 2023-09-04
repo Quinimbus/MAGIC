@@ -1,6 +1,8 @@
 export enum FieldType {
     STRING,
     NUMBER,
+    LOCALDATE,
+    LOCALDATETIME,
     UNKNOWN
 }
 
