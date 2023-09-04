@@ -44,6 +44,8 @@ public class AdminSkeletonGenerator {
             copyFile("src/qn/components/dialog/EntityEditDialog.vue");
             copyFile("src/qn/components/dialog/index.ts");
             copyFile("src/qn/components/form/EntityForm.vue");
+            copyFile("src/qn/components/form/DateField.vue");
+            copyFile("src/qn/components/form/DateTimeField.vue");
             copyFile("src/qn/components/form/NumberField.vue");
             copyFile("src/qn/components/form/StringField.vue");
             copyFile("src/qn/components/form/index.ts");
