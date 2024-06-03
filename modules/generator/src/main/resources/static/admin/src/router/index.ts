@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { toRoute } from '@/qn/ui/UI'
+import { toRoute } from '@quinimbus/admin-ui'
 import entityTypeDefinitions from '@/domain'
 
 const router = createRouter({

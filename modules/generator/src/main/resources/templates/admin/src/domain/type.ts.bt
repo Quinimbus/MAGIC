@@ -1,9 +1,10 @@
-import { FieldType, type TypeDefinition } from '@/qn/types/entities'
+import { Entity } from '@quinimbus/admin-ui'
+import { FieldType, type TypeDefinition } from '@quinimbus/admin-ui'
 import {{typeNameLCPlural}}View from '@/views/{{typeNameUCPlural}}ListView.vue'
 
-export type {{typeNameUC}} = {
+export class {{typeNameUC}} extends Entity<{{typeNameUC}}> {
     {{for field in fields}}
-    {{field.name}}: {{field.type}}{{end}}
+    {{field.name}}?: {{field.type}}{{end}}
 }
 
 const {{typeNameLC}}Definition: TypeDefinition = {
@@ -14,6 +15,7 @@ const {{typeNameLC}}Definition: TypeDefinition = {
             type: FieldType.{{field.fieldType}}
         },{{end}}
     ],
+    keyField: "{{keyField}}",
     icon: "{{icon}}",
     key: "{{typeNameLC}}",
     keyPlural: "{{typeNameLCPlural}}",

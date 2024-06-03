@@ -28,6 +28,7 @@ public class AdminListViewTypeGenerator extends RecordEntityBasedGenerator {
     public void generateType() {
         var typeConfig = this.getTypeConfig();
         var context = new TemplateContext();
+        context.set("keyField", typeConfig.keyField());
         context.set("icon", typeConfig.icon());
         context.set("labelSingular", typeConfig.labelSingular());
         context.set("labelPlural", typeConfig.labelPlural());
@@ -82,13 +83,23 @@ public class AdminListViewTypeGenerator extends RecordEntityBasedGenerator {
     }
     
     private AdminUIConfig.Type getTypeConfig() {
-        return this.config.types().getOrDefault(
-                uncapitalize(name),
-                new cloud.quinimbus.magic.config.AdminUIConfig.Type(
-                        null,
+        var defaultConfig = new cloud.quinimbus.magic.config.AdminUIConfig.Type(
+                        "database",
                         capitalize(name),
                         capitalize(IDs.toPlural(name)),
-                        Map.of()));
+                        this.idFieldName,
+                        Map.of());
+        var providedConfig = this.config.types().get(uncapitalize(name));
+        if (providedConfig == null) {
+            return defaultConfig;
+        }
+        return new cloud.quinimbus.magic.config.AdminUIConfig.Type(
+                providedConfig.icon() == null ? defaultConfig.icon() : providedConfig.icon(),
+                providedConfig.labelSingular() == null ? defaultConfig.labelSingular() : providedConfig.labelSingular(),
+                providedConfig.labelPlural() == null ? defaultConfig.labelPlural() : providedConfig.labelPlural(),
+                providedConfig.keyField() == null ? defaultConfig.keyField() : providedConfig.keyField(),
+                providedConfig.fields() == null ? defaultConfig.fields() : providedConfig.fields()
+        );
     }
     
     private AdminUIConfig.Field getFieldConfig(String field) {

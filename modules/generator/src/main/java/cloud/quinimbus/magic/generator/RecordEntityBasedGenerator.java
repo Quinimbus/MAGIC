@@ -11,6 +11,7 @@ public abstract class RecordEntityBasedGenerator {
     final MagicClassElement recordElement;
     final String name;
     final String packageName;
+    final String idFieldName;
     final TypeMirror idType;
     final TypeMirror owningType;
 
@@ -18,11 +19,12 @@ public abstract class RecordEntityBasedGenerator {
         this.recordElement = recordElement;
         this.name = recordElement.getSimpleName();
         this.packageName = recordElement.getPackageName();
-        this.idType = recordElement.findFieldsAnnotatedWith("cloud.quinimbus.persistence.api.annotation.EntityIdField")
+        var idElement = recordElement.findFieldsAnnotatedWith("cloud.quinimbus.persistence.api.annotation.EntityIdField")
                 .findFirst()
-                .map(e -> e.getElement().asType())
                 .orElseThrow(() ->
                         new IllegalArgumentException("Cannot find EntityIdField on any record field of record " + name));
+        this.idFieldName = idElement.getSimpleName();
+        this.idType = idElement.getElement().asType();
         this.owningType = recordElement
                 .findAnnotation(QuiNimbusCommon.OWNER_ANNOTATION_NAME)
                 .flatMap(a -> a.getElementValue("owningEntity").map(MagicClassElement.class::cast))

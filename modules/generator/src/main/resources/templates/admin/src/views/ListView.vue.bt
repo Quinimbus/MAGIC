@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { {{typeNameLC}}Definition, type {{typeNameUC}} } from '@/domain'
-import { EntityView, } from '@/qn/components/view';
-import { RestBasedEntityListDataSource } from '@/qn/datasource/EntityListDataSource';
+import { {{typeNameLC}}Definition, {{typeNameUC}} } from '@/domain'
+import { EntityView, RestBasedEntityListDataSource } from '@quinimbus/admin-ui';
 
-const datasource = new RestBasedEntityListDataSource<{{typeNameUC}}>("http://localhost:8080", {{typeNameLC}}Definition)
+const datasource = new RestBasedEntityListDataSource<{{typeNameUC}}>({{typeNameUC}}, "http://localhost:8080", {{typeNameLC}}Definition)
+const entityFactory = () => new {{typeNameUC}}();
 </script>
 
 <template>
-    <EntityView :type="{{typeNameLC}}Definition" :datasource="datasource" />
+    <EntityView :type="{{typeNameLC}}Definition" :datasource="datasource" :entity-factory="entityFactory" />
 </template>

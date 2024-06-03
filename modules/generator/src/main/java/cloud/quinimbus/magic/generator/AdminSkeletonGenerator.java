@@ -25,12 +25,6 @@ public class AdminSkeletonGenerator {
             generateIndexHtml();
             generateAppVue();
             Files.createDirectories(adminUiPath.resolve("src/assets"));
-            Files.createDirectories(adminUiPath.resolve("src/qn/components/dialog"));
-            Files.createDirectories(adminUiPath.resolve("src/qn/components/form"));
-            Files.createDirectories(adminUiPath.resolve("src/qn/components/view"));
-            Files.createDirectories(adminUiPath.resolve("src/qn/datasource"));
-            Files.createDirectories(adminUiPath.resolve("src/qn/types"));
-            Files.createDirectories(adminUiPath.resolve("src/qn/ui"));
             Files.createDirectories(adminUiPath.resolve("src/router"));
             copyFile("env.d.ts");
             copyFile("tsconfig.json");
@@ -40,22 +34,6 @@ public class AdminSkeletonGenerator {
             copyFile("vite.config.ts");
             copyFile("src/assets/main.css");
             copyFile("src/main.ts");
-            copyFile("src/qn/components/dialog/EntityAddDialog.vue");
-            copyFile("src/qn/components/dialog/EntityEditDialog.vue");
-            copyFile("src/qn/components/dialog/index.ts");
-            copyFile("src/qn/components/form/EntityForm.vue");
-            copyFile("src/qn/components/form/DateField.vue");
-            copyFile("src/qn/components/form/DateTimeField.vue");
-            copyFile("src/qn/components/form/NumberField.vue");
-            copyFile("src/qn/components/form/StringField.vue");
-            copyFile("src/qn/components/form/index.ts");
-            copyFile("src/qn/components/view/EntityView.vue");
-            copyFile("src/qn/components/view/EntityViewDataTable.vue");
-            copyFile("src/qn/components/view/EntityViewToolbar.vue");
-            copyFile("src/qn/components/view/index.ts");
-            copyFile("src/qn/datasource/EntityListDataSource.ts");
-            copyFile("src/qn/types/entities.ts");
-            copyFile("src/qn/ui/UI.ts");
             copyFile("src/router/index.ts");
         } catch (IOException ex) {
             throw new IllegalStateException(ex);
@@ -66,6 +44,7 @@ public class AdminSkeletonGenerator {
         var context = new TemplateContext();
         context.set("appname", config.app().name());
         context.set("appversion", config.app().version());
+        context.set("adminuidependency", config.adminUiDependency().version());
         templateRenderer.generateFromTemplate("package.json", context);
     }
     
