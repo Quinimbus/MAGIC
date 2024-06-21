@@ -13,7 +13,8 @@ public abstract class RecordEntityBasedGenerator {
     final String packageName;
     final String idFieldName;
     final TypeMirror idType;
-    final TypeMirror owningType;
+    final MagicClassElement owningType;
+    private String ownerField;
 
     RecordEntityBasedGenerator(MagicClassElement recordElement) {
         this.recordElement = recordElement;
@@ -25,10 +26,13 @@ public abstract class RecordEntityBasedGenerator {
                         new IllegalArgumentException("Cannot find EntityIdField on any record field of record " + name));
         this.idFieldName = idElement.getSimpleName();
         this.idType = idElement.getElement().asType();
-        this.owningType = recordElement
-                .findAnnotation(QuiNimbusCommon.OWNER_ANNOTATION_NAME)
+        var ownerAnnotation = recordElement
+                .findAnnotation(QuiNimbusCommon.OWNER_ANNOTATION_NAME);
+        this.owningType = ownerAnnotation
                 .flatMap(a -> a.getElementValue("owningEntity").map(MagicClassElement.class::cast))
-                .map(e -> e.getElement().asType())
+                .orElse(null);
+        this.ownerField = ownerAnnotation
+                .flatMap(a -> a.getElementValue("field").map(String.class::cast))
                 .orElse(null);
     }
     
@@ -52,6 +56,10 @@ public abstract class RecordEntityBasedGenerator {
     }
     
     TypeName owningTypeName() {
-        return ClassName.get(owningType);
+        return ClassName.get(owningType.getElement().asType());
+    }
+    
+    String ownerField() {
+        return ownerField;
     }
 }

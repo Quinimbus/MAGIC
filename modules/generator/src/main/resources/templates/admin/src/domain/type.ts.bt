@@ -1,5 +1,4 @@
-import { Entity } from '@quinimbus/admin-ui'
-import { FieldType, type TypeDefinition } from '@quinimbus/admin-ui'
+import { Entity, FieldType, type TypeDefinition, DefaultField, DefaultTypeDefinition } from '@quinimbus/admin-ui'
 import {{typeNameLCPlural}}View from '@/views/{{typeNameUCPlural}}ListView.vue'
 
 export class {{typeNameUC}} extends Entity<{{typeNameUC}}> {
@@ -8,11 +7,14 @@ export class {{typeNameUC}} extends Entity<{{typeNameUC}}> {
 }
 
 const {{typeNameLC}}Definition: TypeDefinition = {
+    ...DefaultTypeDefinition,
     fields: [{{for field in fields}}
         {
+            ...DefaultField,
             key: "{{field.name}}",
             label: "{{field.label}}",
-            type: FieldType.{{field.fieldType}}
+            type: FieldType.{{field.fieldType}}{{if weak && field.owningField}},
+            owningField: {{field.owningField}}{{end}}
         },{{end}}
     ],
     keyField: "{{keyField}}",
@@ -21,7 +23,9 @@ const {{typeNameLC}}Definition: TypeDefinition = {
     keyPlural: "{{typeNameLCPlural}}",
     labelSingular: "{{labelSingular}}",
     labelPlural: "{{labelPlural}}",
-    listView: {{typeNameLCPlural}}View
+    listView: {{typeNameLCPlural}}View{{if weak}},
+    weak: true,
+    owningType: "{{owningType}}"{{end}}
 }
 
 export { {{typeNameLC}}Definition }

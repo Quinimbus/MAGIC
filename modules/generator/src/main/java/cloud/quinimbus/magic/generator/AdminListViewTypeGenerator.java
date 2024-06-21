@@ -15,7 +15,7 @@ public class AdminListViewTypeGenerator extends RecordEntityBasedGenerator {
     private final AdminUIConfig config;
     private final TemplateRenderer templateRenderer;
     
-    public static record TSField(String name, String type, String label, String fieldType) {
+    public static record TSField(String name, String type, String label, String fieldType, boolean owningField) {
         
     }
     
@@ -36,12 +36,15 @@ public class AdminListViewTypeGenerator extends RecordEntityBasedGenerator {
         context.set("typeNameLCPlural", uncapitalize(IDs.toPlural(name)));
         context.set("typeNameUC", capitalize(name));
         context.set("typeNameUCPlural", capitalize(IDs.toPlural(name)));
+        context.set("weak", weak());
+        context.set("owningType", weak() ? uncapitalize(owningType.getSimpleName()) : null);
         context.set("fields", recordElement.findFields()
                 .map(e -> new TSField(
                         e.getSimpleName(),
                         toTSType(e.getElement().asType().toString()),
                         getFieldConfig(e.getSimpleName()).label(),
-                        toFieldType(e.getElement().asType().toString())))
+                        toFieldType(e.getElement().asType().toString()),
+                        weak() && e.getSimpleName().equals(ownerField())))
                 .toList());
         this.templateRenderer.generateFromTemplate(
                 "src/domain/type.ts",

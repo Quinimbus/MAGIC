@@ -42,7 +42,7 @@ public class MagicAnnotationElement {
                     if (e.getValue() instanceof DeclaredType type) {
                         return (T) new MagicClassElement((TypeElement) type.asElement(), processingEnvironment);
                     }
-                    return (T)e;
+                    return (T)e.getValue();
                 })
                 .findFirst();
     }
