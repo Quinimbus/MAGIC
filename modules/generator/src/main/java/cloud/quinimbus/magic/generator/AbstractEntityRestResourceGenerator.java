@@ -8,11 +8,11 @@ public class AbstractEntityRestResourceGenerator extends RecordEntityBasedGenera
     public AbstractEntityRestResourceGenerator(MagicClassElement recordElement) {
         super(recordElement);
     }
-    
+
     ClassName repository() {
         return ClassName.get(packageName, name + "Repository");
     }
-    
+
     ClassName repository(MagicClassElement e) {
         return ClassName.get(e.getPackageName(), e.getSimpleName().concat("Repository"));
     }

@@ -18,18 +18,17 @@ import javax.lang.model.element.TypeElement;
 @SupportedAnnotationTypes("cloud.quinimbus.magic.annotations.GenerateRestEndpoints")
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 public class GenerateRestEndpointsProcessor extends MagicClassProcessor {
-    
+
     private Map<MagicClassElement, List<MagicClassElement>> entityChildren = new LinkedHashMap<>();
 
     @Override
     public void beforeProcessAll(TypeElement annotation, Set<MagicClassElement> elements) {
         entityChildren = elements.stream()
                 .filter(e -> e.isAnnotatedWith(QuiNimbusCommon.OWNER_ANNOTATION_NAME))
-                .collect(Collectors.groupingBy(
-                        e -> e.findAnnotation(QuiNimbusCommon.OWNER_ANNOTATION_NAME)
-                                .flatMap(a -> a.getElementValue("owningEntity"))
-                                .map(MagicClassElement.class::cast)
-                                .orElseThrow()));
+                .collect(Collectors.groupingBy(e -> e.findAnnotation(QuiNimbusCommon.OWNER_ANNOTATION_NAME)
+                        .flatMap(a -> a.getElementValue("owningEntity"))
+                        .map(MagicClassElement.class::cast)
+                        .orElseThrow()));
     }
 
     @Override
@@ -47,7 +46,5 @@ public class GenerateRestEndpointsProcessor extends MagicClassProcessor {
     }
 
     @Override
-    public void afterProcessAll(TypeElement annotation, Set<MagicClassElement> elements) {
-        
-    }
+    public void afterProcessAll(TypeElement annotation, Set<MagicClassElement> elements) {}
 }

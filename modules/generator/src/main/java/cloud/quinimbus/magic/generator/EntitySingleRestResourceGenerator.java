@@ -1,12 +1,13 @@
 package cloud.quinimbus.magic.generator;
 
+import static cloud.quinimbus.magic.util.Strings.*;
+
 import cloud.quinimbus.common.tools.IDs;
 import cloud.quinimbus.common.tools.Records;
 import cloud.quinimbus.magic.classnames.Java;
 import cloud.quinimbus.magic.classnames.Javax;
 import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
-import static cloud.quinimbus.magic.util.Strings.*;
 import cloud.quinimbus.magic.spec.MagicTypeSpec;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
@@ -37,7 +38,9 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
         var additionalFields = entityChildren.stream()
                 .map(e -> {
                     var repository = repository(e);
-                    return FieldSpec.builder(repository, uncapitalize(repository.simpleName()), Modifier.PRIVATE, Modifier.FINAL).build();
+                    return FieldSpec.builder(
+                                    repository, uncapitalize(repository.simpleName()), Modifier.PRIVATE, Modifier.FINAL)
+                            .build();
                 })
                 .toList();
         if (!weak()) {
@@ -55,9 +58,7 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .build());
         additionalFields.forEach(singleResourceTypeBuilder::addField);
         entityChildren.stream()
-                .flatMap(child -> Stream.of(
-                createSubResourceAllMethod(child),
-                createSubResourceSingleMethod(child)))
+                .flatMap(child -> Stream.of(createSubResourceAllMethod(child), createSubResourceSingleMethod(child)))
                 .forEach(singleResourceTypeBuilder::addMethod);
         return new MagicTypeSpec(singleResourceTypeBuilder.build(), packageName);
     }
@@ -65,15 +66,10 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
     private ParameterizedTypeName superclass() {
         if (weak()) {
             return ParameterizedTypeName.get(
-                    QuiNimbusRest.ABSTRACT_WEAK_CRUD_SINGLE_RESOURCE,
-                    entityTypeName(),
-                    idTypeName(),
-                    owningTypeName());
+                    QuiNimbusRest.ABSTRACT_WEAK_CRUD_SINGLE_RESOURCE, entityTypeName(), idTypeName(), owningTypeName());
         } else {
             return ParameterizedTypeName.get(
-                    QuiNimbusRest.ABSTRACT_CRUD_SINGLE_RESOURCE,
-                    entityTypeName(),
-                    idTypeName());
+                    QuiNimbusRest.ABSTRACT_CRUD_SINGLE_RESOURCE, entityTypeName(), idTypeName());
         }
     }
 
@@ -81,20 +77,18 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
         var additionalParameters = entityChildren.stream()
                 .map(e -> {
                     var repository = repository(e);
-                    return ParameterSpec.builder(repository, uncapitalize(repository.simpleName())).build();
+                    return ParameterSpec.builder(repository, uncapitalize(repository.simpleName()))
+                            .build();
                 })
                 .toList();
-        var constructor = MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PUBLIC);
+        var constructor = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
         var code = CodeBlock.builder();
         if (weak()) {
-            constructor.addParameter(ParameterSpec
-                    .builder(ParameterizedTypeName.get(
-                            Java.FUNCTION,
-                            Javax.RS_URIINFO,
+            constructor.addParameter(ParameterSpec.builder(
                             ParameterizedTypeName.get(
-                                    Java.OPTIONAL,
-                                    owningTypeName())),
+                                    Java.FUNCTION,
+                                    Javax.RS_URIINFO,
+                                    ParameterizedTypeName.get(Java.OPTIONAL, owningTypeName())),
                             "owner")
                     .build());
             code.add("super($T.class, $T.class, owner, repository);", entityTypeName(), idTypeName());
@@ -102,14 +96,11 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
             constructor.addAnnotation(Javax.INJECT);
             code.add("super($T.class, $T.class, repository);", entityTypeName(), idTypeName());
         }
-        constructor.addParameter(ParameterSpec
-                .builder(ClassName.get(packageName, name + "Repository"), "repository")
+        constructor.addParameter(ParameterSpec.builder(ClassName.get(packageName, name + "Repository"), "repository")
                 .build());
         additionalParameters.forEach(constructor::addParameter);
         additionalParameters.forEach(p -> code.add("this.%s = %s;".formatted(p.name, p.name)));
-        return constructor
-                .addCode(code.build())
-                .build();
+        return constructor.addCode(code.build()).build();
     }
 
     private MethodSpec createSubResourceAllMethod(MagicClassElement child) {
@@ -121,9 +112,12 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                         .addMember("value", "\"/%s/\"".formatted(uncapitalize(pluralName)))
                         .build())
                 .returns(resourceClass)
-                .addCode(CodeBlock.of("""
-                         return new $T(this::findEntityById, $L);
-                         """, resourceClass, uncapitalize(repository(child).simpleName())))
+                .addCode(CodeBlock.of(
+                        """
+                        return new $T(this::findEntityById, $L);
+                        """,
+                        resourceClass,
+                        uncapitalize(repository(child).simpleName())))
                 .build();
     }
 
@@ -133,12 +127,17 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
         return MethodSpec.methodBuilder("subResource%s".formatted(capitalize(singluarName)))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Javax.RS_PATH)
-                        .addMember("value", "\"/%s/{%s}/\"".formatted(uncapitalize(singluarName), child.getSimpleName() + "Id"))
+                        .addMember(
+                                "value",
+                                "\"/%s/{%s}/\"".formatted(uncapitalize(singluarName), child.getSimpleName() + "Id"))
                         .build())
                 .returns(resourceClass)
-                .addCode(CodeBlock.of("""
-                         return new $T(this::findEntityById, $L);
-                         """, resourceClass, uncapitalize(repository(child).simpleName())))
+                .addCode(CodeBlock.of(
+                        """
+                        return new $T(this::findEntityById, $L);
+                        """,
+                        resourceClass,
+                        uncapitalize(repository(child).simpleName())))
                 .build();
     }
 }

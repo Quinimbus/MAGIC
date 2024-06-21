@@ -13,7 +13,7 @@ public class MagicTypeSpec {
         this.typeSpec = typeSpec;
         this.packageName = packageName;
     }
-    
+
     public TypeName toTypeName() {
         return ClassName.get(this.packageName, this.typeSpec.name);
     }

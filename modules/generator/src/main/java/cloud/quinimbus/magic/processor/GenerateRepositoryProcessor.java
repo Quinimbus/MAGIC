@@ -17,8 +17,7 @@ import javax.lang.model.element.TypeElement;
 public class GenerateRepositoryProcessor extends MagicClassProcessor {
 
     @Override
-    public void beforeProcessAll(TypeElement annotation, Set<MagicClassElement> elements) {
-    }
+    public void beforeProcessAll(TypeElement annotation, Set<MagicClassElement> elements) {}
 
     @Override
     public void process(TypeElement annotation, MagicClassElement element) {
@@ -34,7 +33,10 @@ public class GenerateRepositoryProcessor extends MagicClassProcessor {
 
     @Override
     public void afterProcessAll(TypeElement annotation, Set<MagicClassElement> elements) {
-        var packageName = elements.stream().map(MagicClassElement::getPackageName).reduce(this::commonPackageName).orElseThrow();
+        var packageName = elements.stream()
+                .map(MagicClassElement::getPackageName)
+                .reduce(this::commonPackageName)
+                .orElseThrow();
         if (annotation.getSimpleName().contentEquals("GenerateRepository")) {
             try {
                 var gen = new RepositoryProducerGenerator(elements);

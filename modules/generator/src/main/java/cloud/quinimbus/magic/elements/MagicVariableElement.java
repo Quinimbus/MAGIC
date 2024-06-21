@@ -7,14 +7,14 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 
 public class MagicVariableElement extends AbstractMagicElementWrapper<VariableElement> {
-    
+
     private final VariableElement element;
 
     public MagicVariableElement(VariableElement element, ProcessingEnvironment processingEnvironment) {
         super(element, processingEnvironment);
         this.element = element;
     }
-    
+
     public boolean isClass(Class cls) {
         if (this.element.asType() instanceof DeclaredType dtype) {
             if (dtype.asElement() instanceof TypeElement te) {
@@ -23,7 +23,7 @@ public class MagicVariableElement extends AbstractMagicElementWrapper<VariableEl
         }
         return false;
     }
-    
+
     public TypeName getType() {
         return TypeName.get(this.element.asType());
     }

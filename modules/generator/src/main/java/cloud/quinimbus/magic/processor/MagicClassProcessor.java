@@ -16,8 +16,7 @@ public abstract class MagicClassProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment re) {
         set.forEach(annotation -> {
-            var elements = re.getElementsAnnotatedWith(annotation)
-                    .stream()
+            var elements = re.getElementsAnnotatedWith(annotation).stream()
                     .filter(element -> element instanceof TypeElement)
                     .map(element -> new MagicClassElement((TypeElement) element, this.processingEnv))
                     .collect(Collectors.toSet());
@@ -27,21 +26,19 @@ public abstract class MagicClassProcessor extends AbstractProcessor {
         });
         return false;
     }
-    
+
     public abstract void beforeProcessAll(TypeElement annotation, Set<MagicClassElement> elements);
 
     public abstract void process(TypeElement annotation, MagicClassElement element);
 
     public abstract void afterProcessAll(TypeElement annotation, Set<MagicClassElement> elements);
-    
+
     public void writeTypeFile(MagicTypeSpec type) throws IOException {
         this.writeTypeFile(type.getPackageName(), type.getTypeSpec());
     }
 
     public void writeTypeFile(String packageName, TypeSpec type) throws IOException {
-        var file = JavaFile.builder(packageName, type)
-                .skipJavaLangImports(true)
-                .build();
+        var file = JavaFile.builder(packageName, type).skipJavaLangImports(true).build();
         file.writeTo(processingEnv.getFiler());
     }
 }

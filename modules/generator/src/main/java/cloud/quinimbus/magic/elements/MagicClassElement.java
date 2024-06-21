@@ -17,9 +17,12 @@ public class MagicClassElement extends AbstractMagicElementWrapper<TypeElement> 
         this.element = element;
         this.processingEnvironment = processingEnvironment;
     }
-    
+
     public String getPackageName() {
-        return this.processingEnvironment.getElementUtils().getPackageOf(this.element).toString();
+        return this.processingEnvironment
+                .getElementUtils()
+                .getPackageOf(this.element)
+                .toString();
     }
 
     public Stream<MagicVariableElement> findFields() {
@@ -30,8 +33,7 @@ public class MagicClassElement extends AbstractMagicElementWrapper<TypeElement> 
     }
 
     public Stream<MagicVariableElement> findFieldsAnnotatedWith(String annotationName) {
-        return this.findFields()
-                .filter(e -> e.isAnnotatedWith(annotationName));
+        return this.findFields().filter(e -> e.isAnnotatedWith(annotationName));
     }
 
     @Override

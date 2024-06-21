@@ -21,15 +21,22 @@ import javax.tools.StandardLocation;
 @SupportedAnnotationTypes("cloud.quinimbus.magic.annotations.GenerateAdminListView")
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 public class GenerateAdminListViewProcessor extends MagicClassProcessor {
-    
+
     private AdminUIConfig config;
-    
+
     private Path srcPath;
 
     @Override
     public void beforeProcessAll(TypeElement annotation, Set<MagicClassElement> elements) {
         try {
-            var rootPath = Path.of(processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "", "foo").toUri()).getParent().getParent().getParent().getParent();
+            var rootPath = Path.of(processingEnv
+                            .getFiler()
+                            .createResource(StandardLocation.SOURCE_OUTPUT, "", "foo")
+                            .toUri())
+                    .getParent()
+                    .getParent()
+                    .getParent()
+                    .getParent();
             var configPath = rootPath.resolve("src/main/resources/META-INF/cloud.quinimbus.magic/admin-ui.yml");
             try (var is = Files.newInputStream(configPath)) {
                 var mapper = new ObjectMapper(new YAMLFactory());

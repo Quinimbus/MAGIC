@@ -9,7 +9,7 @@ import java.util.Set;
 import javax.lang.model.element.Modifier;
 
 public class RepositoryProducerGenerator {
-    
+
     final Set<MagicClassElement> recordElements;
 
     public RepositoryProducerGenerator(Set<MagicClassElement> recordElements) {
@@ -24,8 +24,9 @@ public class RepositoryProducerGenerator {
                 .addMethod(MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(ClassName.get("javax.inject", "Inject"))
-                        .addParameter(ParameterSpec
-                                .builder(ClassName.get("cloud.quinimbus.persistence.api", "PersistenceContext"), "persistenceContext")
+                        .addParameter(ParameterSpec.builder(
+                                        ClassName.get("cloud.quinimbus.persistence.api", "PersistenceContext"),
+                                        "persistenceContext")
                                 .build())
                         .addCode("super(persistenceContext);")
                         .build());
@@ -38,7 +39,6 @@ public class RepositoryProducerGenerator {
                     .returns(ClassName.get(e.getPackageName(), name + "Repository"))
                     .build());
         });
-        return producerTypeBuilder
-                .build();
+        return producerTypeBuilder.build();
     }
 }

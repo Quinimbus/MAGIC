@@ -1,10 +1,11 @@
 package cloud.quinimbus.magic.generator;
 
+import static cloud.quinimbus.magic.util.Strings.*;
+
 import cloud.quinimbus.magic.classnames.QuiNimbusPersistence;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
 import cloud.quinimbus.magic.spec.MagicTypeSpec;
-import static cloud.quinimbus.magic.util.Strings.*;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -28,30 +29,22 @@ public class RepositoryGenerator extends RecordEntityBasedGenerator {
                         .addMember("value", CodeBlock.of("$L.class", name))
                         .build());
         if (weak()) {
-            repositoryTypeBuilder.addSuperinterface(
-                    ParameterizedTypeName.get(
-                            QuiNimbusPersistence.WEAK_CRUD_REPOSITORY,
-                            entityTypeName(),
-                            idTypeName(),
-                            owningTypeName()));
+            repositoryTypeBuilder.addSuperinterface(ParameterizedTypeName.get(
+                    QuiNimbusPersistence.WEAK_CRUD_REPOSITORY, entityTypeName(), idTypeName(), owningTypeName()));
         } else {
             repositoryTypeBuilder.addSuperinterface(
-                    ParameterizedTypeName.get(
-                            QuiNimbusPersistence.CRUD_REPOSITORY,
-                            entityTypeName(),
-                            idTypeName()));
+                    ParameterizedTypeName.get(QuiNimbusPersistence.CRUD_REPOSITORY, entityTypeName(), idTypeName()));
         }
-        recordElement.findFieldsAnnotatedWith("cloud.quinimbus.persistence.api.annotation.Searchable")
+        recordElement
+                .findFieldsAnnotatedWith("cloud.quinimbus.persistence.api.annotation.Searchable")
                 .forEach(ve -> repositoryTypeBuilder.addMethod(createFindAllByMethod(ve)));
         return new MagicTypeSpec(repositoryTypeBuilder.build(), packageName);
     }
-    
+
     private MethodSpec createFindAllByMethod(MagicVariableElement ve) {
         var method = MethodSpec.methodBuilder("findAllBy%s".formatted(capitalize(ve.getSimpleName())))
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                .returns(ParameterizedTypeName.get(
-                        ClassName.get(Stream.class),
-                        entityTypeName()));
+                .returns(ParameterizedTypeName.get(ClassName.get(Stream.class), entityTypeName()));
         if (weak()) {
             method.addParameter(owningTypeName(), "owner");
         }

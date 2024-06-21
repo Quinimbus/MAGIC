@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class AdminSkeletonGenerator {
-    
+
     private final Path adminUiPath;
     private final AdminUIConfig config;
     private final TemplateRenderer templateRenderer;
@@ -18,7 +18,7 @@ public class AdminSkeletonGenerator {
         this.config = config;
         this.templateRenderer = new TemplateRenderer(adminUiPath);
     }
-    
+
     public void generateSkeleton() {
         try {
             generatePackageJson();
@@ -39,7 +39,7 @@ public class AdminSkeletonGenerator {
             throw new IllegalStateException(ex);
         }
     }
-    
+
     private void generatePackageJson() {
         var context = new TemplateContext();
         context.set("appname", config.app().name());
@@ -47,23 +47,23 @@ public class AdminSkeletonGenerator {
         context.set("adminuidependency", config.adminUiDependency().version());
         templateRenderer.generateFromTemplate("package.json", context);
     }
-    
+
     private void generateIndexHtml() {
         var context = new TemplateContext();
         context.set("apptitle", config.app().name());
         templateRenderer.generateFromTemplate("index.html", context);
     }
-    
+
     private void generateAppVue() {
         var context = new TemplateContext();
         context.set("apptitle", config.app().name());
         context.set("appversion", config.app().version());
         templateRenderer.generateFromTemplate("src/App.vue", context);
     }
-    
+
     private void copyFile(String path) {
         try (var outputStream = Files.newOutputStream(adminUiPath.resolve(path));
-            var inputStream = getClass().getResourceAsStream("/static/admin/%s".formatted(path))) {
+                var inputStream = getClass().getResourceAsStream("/static/admin/%s".formatted(path))) {
             inputStream.transferTo(outputStream);
         } catch (IOException ex) {
             throw new IllegalStateException(ex);

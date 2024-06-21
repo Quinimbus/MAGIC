@@ -5,7 +5,7 @@ import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record AdminUIConfig(App app, Map<String, Type> types, AdminUiDependencyConfig adminUiDependency) {
-    
+
     public AdminUIConfig {
         if (app == null) {
             app = new App(null, null, null);
@@ -17,20 +17,20 @@ public record AdminUIConfig(App app, Map<String, Type> types, AdminUiDependencyC
             adminUiDependency = new AdminUiDependencyConfig("0.0.0");
         }
     }
-    
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static record AdminUiDependencyConfig(String version) {
-        
+
         public AdminUiDependencyConfig {
             if (version == null || version.isBlank()) {
                 version = "0.0.0";
             }
         }
     }
-    
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static record App(String name, String version, String title) {
-        
+
         public App {
             if (name == null || name.isBlank()) {
                 name = "some-admin-ui";
@@ -45,8 +45,9 @@ public record AdminUIConfig(App app, Map<String, Type> types, AdminUiDependencyC
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static record Type(String icon, String labelSingular, String labelPlural, String keyField, Map<String, Field> fields) {
-        
+    public static record Type(
+            String icon, String labelSingular, String labelPlural, String keyField, Map<String, Field> fields) {
+
         public Type {
             if (icon == null || icon.isBlank()) {
                 icon = "database";
@@ -56,9 +57,7 @@ public record AdminUIConfig(App app, Map<String, Type> types, AdminUiDependencyC
             }
         }
     }
-    
+
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static record Field(String label) {
-        
-    }
+    public static record Field(String label) {}
 }
