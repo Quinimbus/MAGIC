@@ -5,7 +5,7 @@ import static cloud.quinimbus.magic.util.Strings.*;
 import cloud.quinimbus.common.tools.IDs;
 import cloud.quinimbus.common.tools.Records;
 import cloud.quinimbus.magic.classnames.Java;
-import cloud.quinimbus.magic.classnames.Javax;
+import cloud.quinimbus.magic.classnames.Jakarta;
 import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
@@ -35,8 +35,8 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                 .addMethod(constructor());
         if (!weak()) {
             allResourceTypeBuilder
-                    .addAnnotation(Javax.REQUEST_SCOPED)
-                    .addAnnotation(AnnotationSpec.builder(Javax.RS_PATH)
+                    .addAnnotation(Jakarta.REQUEST_SCOPED)
+                    .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH)
                             .addMember("value", "\"%s\"".formatted(IDs.toPlural(Records.idFromType(recordElement))))
                             .build());
         }
@@ -60,10 +60,8 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
         var constructor = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
         if (weak()) {
             constructor
-                    .addParameter(ParameterSpec.builder(
-                                    ParameterizedTypeName.get(
-                                            Java.FUNCTION,
-                                            Javax.RS_URIINFO,
+                    .addParameter(ParameterSpec.builder(ParameterizedTypeName.get(Java.FUNCTION,
+                                            Jakarta.RS_URIINFO,
                                             ParameterizedTypeName.get(Java.OPTIONAL, owningTypeName())),
                                     "owner")
                             .build())
@@ -77,7 +75,7 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                     .build();
         } else {
             constructor
-                    .addAnnotation(Javax.INJECT)
+                    .addAnnotation(Jakarta.INJECT)
                     .addParameter(
                             ParameterSpec.builder(repository(), "repository").build())
                     .addCode(
@@ -93,28 +91,26 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
     private MethodSpec createByPropertyEndpoint(MagicVariableElement ve) {
         var method = MethodSpec.methodBuilder("by%s".formatted(capitalize(ve.getSimpleName())))
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(AnnotationSpec.builder(Javax.RS_GET).build())
-                .addAnnotation(AnnotationSpec.builder(Javax.RS_PATH)
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH)
                         .addMember("value", "\"/by/%s/{%s}\"".formatted(ve.getSimpleName(), ve.getSimpleName()))
                         .build())
-                .addAnnotation(AnnotationSpec.builder(Javax.RS_PRODUCES)
-                        .addMember(
-                                "value",
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PRODUCES)
+                        .addMember("value",
                                 CodeBlock.builder()
-                                        .add("$T.APPLICATION_JSON", Javax.RS_MEDIATYPE)
+                                        .add("$T.APPLICATION_JSON", Jakarta.RS_MEDIATYPE)
                                         .build())
                         .build())
-                .addParameter(
-                        ParameterSpec.builder(ClassName.get(ve.getElement().asType()), ve.getSimpleName())
-                                .addAnnotation(AnnotationSpec.builder(Javax.RS_PATH_PARAM)
+                .addParameter(ParameterSpec.builder(ClassName.get(ve.getElement().asType()), ve.getSimpleName())
+                                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH_PARAM)
                                         .addMember("value", "\"%s\"".formatted(ve.getSimpleName()))
                                         .build())
                                 .build())
-                .returns(Javax.RS_RESPONSE);
+                .returns(Jakarta.RS_RESPONSE);
         String code;
         if (weak()) {
-            method.addParameter(ParameterSpec.builder(Javax.RS_URIINFO, "uriInfo")
-                    .addAnnotation(AnnotationSpec.builder(Javax.RS_CONTEXT).build())
+            method.addParameter(ParameterSpec.builder(Jakarta.RS_URIINFO, "uriInfo")
+                    .addAnnotation(AnnotationSpec.builder(Jakarta.RS_CONTEXT).build())
                     .build());
             code =
                     """

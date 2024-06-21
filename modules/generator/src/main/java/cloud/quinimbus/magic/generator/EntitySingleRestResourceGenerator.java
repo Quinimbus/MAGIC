@@ -5,7 +5,7 @@ import static cloud.quinimbus.magic.util.Strings.*;
 import cloud.quinimbus.common.tools.IDs;
 import cloud.quinimbus.common.tools.Records;
 import cloud.quinimbus.magic.classnames.Java;
-import cloud.quinimbus.magic.classnames.Javax;
+import cloud.quinimbus.magic.classnames.Jakarta;
 import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.spec.MagicTypeSpec;
@@ -45,8 +45,8 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .toList();
         if (!weak()) {
             singleResourceTypeBuilder
-                    .addAnnotation(Javax.REQUEST_SCOPED)
-                    .addAnnotation(AnnotationSpec.builder(Javax.RS_PATH)
+                    .addAnnotation(Jakarta.REQUEST_SCOPED)
+                    .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH)
                             .addMember("value", "\"%s/{%s}\"".formatted(Records.idFromType(recordElement), name + "Id"))
                             .build());
         }
@@ -84,16 +84,14 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
         var constructor = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
         var code = CodeBlock.builder();
         if (weak()) {
-            constructor.addParameter(ParameterSpec.builder(
-                            ParameterizedTypeName.get(
-                                    Java.FUNCTION,
-                                    Javax.RS_URIINFO,
+            constructor.addParameter(ParameterSpec.builder(ParameterizedTypeName.get(Java.FUNCTION,
+                                    Jakarta.RS_URIINFO,
                                     ParameterizedTypeName.get(Java.OPTIONAL, owningTypeName())),
                             "owner")
                     .build());
             code.add("super($T.class, $T.class, owner, repository);", entityTypeName(), idTypeName());
         } else {
-            constructor.addAnnotation(Javax.INJECT);
+            constructor.addAnnotation(Jakarta.INJECT);
             code.add("super($T.class, $T.class, repository);", entityTypeName(), idTypeName());
         }
         constructor.addParameter(ParameterSpec.builder(ClassName.get(packageName, name + "Repository"), "repository")
@@ -108,7 +106,7 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
         var resourceClass = ClassName.get(child.getPackageName(), "%sAllResource".formatted(child.getSimpleName()));
         return MethodSpec.methodBuilder("subResource%s".formatted(capitalize(pluralName)))
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(AnnotationSpec.builder(Javax.RS_PATH)
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH)
                         .addMember("value", "\"/%s/\"".formatted(uncapitalize(pluralName)))
                         .build())
                 .returns(resourceClass)
@@ -126,7 +124,7 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
         var resourceClass = ClassName.get(child.getPackageName(), "%sSingleResource".formatted(child.getSimpleName()));
         return MethodSpec.methodBuilder("subResource%s".formatted(capitalize(singluarName)))
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(AnnotationSpec.builder(Javax.RS_PATH)
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH)
                         .addMember(
                                 "value",
                                 "\"/%s/{%s}/\"".formatted(uncapitalize(singluarName), child.getSimpleName() + "Id"))

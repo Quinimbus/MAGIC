@@ -1,5 +1,6 @@
 package cloud.quinimbus.magic.generator;
 
+import cloud.quinimbus.magic.classnames.Jakarta;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
@@ -20,10 +21,10 @@ public class RepositoryProducerGenerator {
         var producerTypeBuilder = TypeSpec.classBuilder("RepositoryProducer")
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(ClassName.get("cloud.quinimbus.persistence.cdi", "AbstractRecordRepositoryProducer"))
-                .addAnnotation(ClassName.get("javax.enterprise.context", "ApplicationScoped"))
+                .addAnnotation(Jakarta.APPLICATION_SCOPED)
                 .addMethod(MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PUBLIC)
-                        .addAnnotation(ClassName.get("javax.inject", "Inject"))
+                        .addAnnotation(Jakarta.INJECT)
                         .addParameter(ParameterSpec.builder(
                                         ClassName.get("cloud.quinimbus.persistence.api", "PersistenceContext"),
                                         "persistenceContext")
@@ -34,7 +35,7 @@ public class RepositoryProducerGenerator {
             var name = e.getSimpleName();
             producerTypeBuilder.addMethod(MethodSpec.methodBuilder(name + "Repository")
                     .addModifiers(Modifier.PUBLIC)
-                    .addAnnotation(ClassName.get("javax.enterprise.inject", "Produces"))
+                    .addAnnotation(Jakarta.PRODUCES)
                     .addCode("return this.getRepository($LRepository.class);", name)
                     .returns(ClassName.get(e.getPackageName(), name + "Repository"))
                     .build());
