@@ -19,7 +19,7 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.StandardLocation;
 
 @SupportedAnnotationTypes("cloud.quinimbus.magic.annotations.GenerateAdminListView")
-@SupportedSourceVersion(SourceVersion.RELEASE_17)
+@SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class GenerateAdminListViewProcessor extends MagicClassProcessor {
 
     private AdminUIConfig config;

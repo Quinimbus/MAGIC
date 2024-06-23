@@ -16,7 +16,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
 
 @SupportedAnnotationTypes("cloud.quinimbus.magic.annotations.GenerateRestEndpoints")
-@SupportedSourceVersion(SourceVersion.RELEASE_17)
+@SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class GenerateRestEndpointsProcessor extends MagicClassProcessor {
 
     private Map<MagicClassElement, List<MagicClassElement>> entityChildren = new LinkedHashMap<>();
