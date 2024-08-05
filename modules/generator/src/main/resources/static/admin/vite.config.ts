@@ -17,7 +17,12 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      external: ['@quinimbus/admin-ui']
+      output: {
+        manualChunks: {
+          'admin-ui': ['@quinimbus/admin-ui'],
+          'vue': ['pinia', 'vue', 'vue-router', 'vuetify', 'vuetify/components'],
+        }
+      }
     }
   }
 })
