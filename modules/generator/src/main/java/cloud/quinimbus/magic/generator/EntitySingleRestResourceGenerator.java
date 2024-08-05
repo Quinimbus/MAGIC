@@ -6,8 +6,10 @@ import cloud.quinimbus.common.tools.IDs;
 import cloud.quinimbus.common.tools.Records;
 import cloud.quinimbus.magic.classnames.Java;
 import cloud.quinimbus.magic.classnames.Jakarta;
+import cloud.quinimbus.magic.classnames.QuiNimbusBinarystore;
 import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
+import cloud.quinimbus.magic.elements.MagicVariableElement;
 import cloud.quinimbus.magic.spec.MagicTypeSpec;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
@@ -60,6 +62,9 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
         entityChildren.stream()
                 .flatMap(child -> Stream.of(createSubResourceAllMethod(child), createSubResourceSingleMethod(child)))
                 .forEach(singleResourceTypeBuilder::addMethod);
+        this.recordElement
+                .findFieldsOfType(QuiNimbusBinarystore.EMBEDDABLE_BINARY)
+                .forEach(ve -> singleResourceTypeBuilder.addMethod(createBinaryDownload(ve)));
         return new MagicTypeSpec(singleResourceTypeBuilder.build(), packageName);
     }
 
@@ -136,6 +141,22 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                         """,
                         resourceClass,
                         uncapitalize(repository(child).simpleName())))
+                .build();
+    }
+
+    private MethodSpec createBinaryDownload(MagicVariableElement field) {
+        return MethodSpec.methodBuilder("download%s".formatted(capitalize(field.getSimpleName())))
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH)
+                        .addMember("value", "\"/%s/download\"".formatted(uncapitalize(field.getSimpleName())))
+                        .build())
+                .addParameter(ParameterSpec.builder(Jakarta.RS_URIINFO, "uriInfo")
+                        .addAnnotation(
+                                AnnotationSpec.builder(Jakarta.RS_CONTEXT).build())
+                        .build())
+                .returns(Jakarta.RS_RESPONSE)
+                .addCode("return downloadBinary(uriInfo, $T::$L);", entityTypeName(), field.getSimpleName())
                 .build();
     }
 }

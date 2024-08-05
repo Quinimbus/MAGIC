@@ -1,5 +1,6 @@
 package cloud.quinimbus.magic.elements;
 
+import com.squareup.javapoet.TypeName;
 import java.util.Objects;
 import java.util.stream.Stream;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -34,6 +35,10 @@ public class MagicClassElement extends AbstractMagicElementWrapper<TypeElement> 
 
     public Stream<MagicVariableElement> findFieldsAnnotatedWith(String annotationName) {
         return this.findFields().filter(e -> e.isAnnotatedWith(annotationName));
+    }
+
+    public Stream<MagicVariableElement> findFieldsOfType(TypeName type) {
+        return this.findFields().filter(ve -> ve.getType().equals(type));
     }
 
     @Override

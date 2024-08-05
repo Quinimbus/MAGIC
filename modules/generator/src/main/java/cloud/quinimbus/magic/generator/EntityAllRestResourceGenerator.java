@@ -6,6 +6,7 @@ import cloud.quinimbus.common.tools.IDs;
 import cloud.quinimbus.common.tools.Records;
 import cloud.quinimbus.magic.classnames.Java;
 import cloud.quinimbus.magic.classnames.Jakarta;
+import cloud.quinimbus.magic.classnames.QuiNimbusBinarystore;
 import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
@@ -18,6 +19,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
+import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGenerator {
@@ -44,6 +46,9 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                 .findFieldsAnnotatedWith("cloud.quinimbus.persistence.api.annotation.Searchable")
                 .filter(ve -> ve.isClass(String.class))
                 .forEach(ve -> allResourceTypeBuilder.addMethod(createByPropertyEndpoint(ve)));
+        this.recordElement
+                .findFieldsOfType(QuiNimbusBinarystore.EMBEDDABLE_BINARY)
+                .forEach(ve -> allResourceTypeBuilder.addMethod(createBinaryWither(ve)));
         return new MagicTypeSpec(allResourceTypeBuilder.build(), packageName);
     }
 
@@ -80,9 +85,11 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                             ParameterSpec.builder(repository(), "repository").build())
                     .addCode(
                             """
-                                 super(repository);
+                                 super($T.class, repository);
                                  this.repository = repository;
-                                 """)
+                                 """,
+                            entityTypeName())
+                    .addCode(initBinaryWither())
                     .build();
         }
         return constructor.build();
@@ -126,5 +133,36 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
         }
         method.addCode(code);
         return method.build();
+    }
+
+    private MethodSpec createBinaryWither(MagicVariableElement ve) {
+        var constructorParams = this.recordElement
+                .findFields()
+                .map(field -> {
+                    if (field.getSimpleName().equals(ve.getSimpleName())) {
+                        return ve.getSimpleName();
+                    } else {
+                        return "entity.%s()".formatted(field.getSimpleName());
+                    }
+                })
+                .collect(Collectors.joining(", "));
+        return MethodSpec.methodBuilder("withBinaryFor%s".formatted(capitalize(ve.getSimpleName())))
+                .addModifiers(Modifier.PRIVATE)
+                .addParameter(ParameterSpec.builder(entityTypeName(), "entity").build())
+                .addParameter(ParameterSpec.builder(QuiNimbusBinarystore.EMBEDDABLE_BINARY, ve.getSimpleName())
+                        .build())
+                .addCode("return new $T($L);", entityTypeName(), constructorParams)
+                .returns(entityTypeName())
+                .build();
+    }
+
+    private CodeBlock initBinaryWither() {
+        return this.recordElement
+                .findFieldsOfType(QuiNimbusBinarystore.EMBEDDABLE_BINARY)
+                .map(e -> CodeBlock.of(
+                        "super.addBinaryWither(\"$L\", this::withBinaryFor$L);",
+                        e.getSimpleName(),
+                        capitalize(e.getSimpleName())))
+                .collect(CodeBlock.joining(";"));
     }
 }
