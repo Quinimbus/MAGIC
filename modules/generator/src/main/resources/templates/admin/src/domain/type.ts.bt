@@ -1,4 +1,4 @@
-import { Entity, FieldType, type TypeDefinition, DefaultField, DefaultTypeDefinition } from '@quinimbus/admin-ui'
+import { {{if containsBinary}}type EmbeddableBinary, {{end}}Entity, FieldType, type TypeDefinition, DefaultField, DefaultTypeDefinition } from '@quinimbus/admin-ui'
 import {{typeNameLCPlural}}View from '@/views/{{typeNameUCPlural}}ListView.vue'
 
 export class {{typeNameUC}} extends Entity<{{typeNameUC}}> {

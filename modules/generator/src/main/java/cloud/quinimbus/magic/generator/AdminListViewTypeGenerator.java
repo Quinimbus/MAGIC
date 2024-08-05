@@ -3,6 +3,7 @@ package cloud.quinimbus.magic.generator;
 import static cloud.quinimbus.magic.util.Strings.*;
 
 import cloud.quinimbus.common.tools.IDs;
+import cloud.quinimbus.magic.classnames.QuiNimbusBinarystore;
 import cloud.quinimbus.magic.config.AdminUIConfig;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.util.TemplateRenderer;
@@ -38,6 +39,12 @@ public class AdminListViewTypeGenerator extends RecordEntityBasedGenerator {
         context.set("weak", weak());
         context.set("owningType", weak() ? uncapitalize(owningType.getSimpleName()) : null);
         context.set(
+                "containsBinary",
+                recordElement
+                        .findFieldsOfType(QuiNimbusBinarystore.EMBEDDABLE_BINARY)
+                        .findAny()
+                        .isPresent());
+        context.set(
                 "fields",
                 recordElement
                         .findFields()
@@ -67,6 +74,7 @@ public class AdminListViewTypeGenerator extends RecordEntityBasedGenerator {
         return switch (parsedType.type()) {
             case "java.lang.String", "java.time.LocalDateTime", "java.time.LocalDate" -> "string";
             case "java.util.List" -> "%s[]".formatted(toTSType(parsedType.genericParam));
+            case "cloud.quinimbus.binarystore.persistence.EmbeddableBinary" -> "EmbeddableBinary | File";
             default -> "any";
         };
     }
@@ -78,6 +86,7 @@ public class AdminListViewTypeGenerator extends RecordEntityBasedGenerator {
             case "java.lang.Integer" -> "NUMBER";
             case "java.time.LocalDate" -> "LOCALDATE";
             case "java.time.LocalDateTime" -> "LOCALDATETIME";
+            case "cloud.quinimbus.binarystore.persistence.EmbeddableBinary" -> "BINARY";
             default -> "UNKNOWN";
         };
     }
