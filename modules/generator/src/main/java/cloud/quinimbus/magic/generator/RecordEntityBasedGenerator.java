@@ -1,6 +1,7 @@
 package cloud.quinimbus.magic.generator;
 
 import cloud.quinimbus.magic.classnames.QuiNimbusCommon;
+import cloud.quinimbus.magic.elements.MagicAnnotationElement;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
@@ -13,6 +14,7 @@ public abstract class RecordEntityBasedGenerator {
     final String packageName;
     final String idFieldName;
     final TypeMirror idType;
+    final boolean idGenerated;
     final MagicClassElement owningType;
     private String ownerField;
 
@@ -25,6 +27,14 @@ public abstract class RecordEntityBasedGenerator {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Cannot find EntityIdField on any record field of record " + name));
+        this.idGenerated = recordElement
+                .findFieldsAnnotatedWith("cloud.quinimbus.persistence.api.annotation.EntityIdField")
+                .findFirst()
+                .get()
+                .findAnnotation("cloud.quinimbus.persistence.api.annotation.EntityIdField")
+                .flatMap(a -> a.<MagicAnnotationElement>getElementValue("generate"))
+                .filter(a -> a.<Boolean>getElementValue("generate").orElse(false))
+                .isPresent();
         this.idFieldName = idElement.getSimpleName();
         this.idType = idElement.getElement().asType();
         var ownerAnnotation = recordElement.findAnnotation(QuiNimbusCommon.OWNER_ANNOTATION_NAME);

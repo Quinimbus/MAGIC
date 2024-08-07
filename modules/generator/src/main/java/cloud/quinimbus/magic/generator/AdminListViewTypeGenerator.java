@@ -17,7 +17,8 @@ public class AdminListViewTypeGenerator extends RecordEntityBasedGenerator {
     private final AdminUIConfig config;
     private final TemplateRenderer templateRenderer;
 
-    public static record TSField(String name, String type, String label, String fieldType, boolean owningField) {}
+    public static record TSField(
+            String name, String type, String label, String fieldType, boolean owningField, boolean hiddenInForm) {}
 
     public AdminListViewTypeGenerator(MagicClassElement recordElement, Path domainPath, AdminUIConfig config) {
         super(recordElement);
@@ -53,7 +54,8 @@ public class AdminListViewTypeGenerator extends RecordEntityBasedGenerator {
                                 toTSType(e.getElement().asType().toString()),
                                 getFieldConfig(e.getSimpleName()).label(),
                                 toFieldType(e.getElement().asType().toString()),
-                                weak() && e.getSimpleName().equals(ownerField())))
+                                weak() && e.getSimpleName().equals(ownerField()),
+                                idFieldName.equals(e.getSimpleName()) ? idGenerated : false))
                         .toList());
         this.templateRenderer.generateFromTemplate("src/domain/type.ts", "%s.ts".formatted(capitalize(name)), context);
     }

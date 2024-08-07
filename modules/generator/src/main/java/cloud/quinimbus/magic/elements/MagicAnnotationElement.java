@@ -52,6 +52,9 @@ public class MagicAnnotationElement {
                     if (e.getValue() instanceof DeclaredType type) {
                         return (T) new MagicClassElement((TypeElement) type.asElement(), processingEnvironment);
                     }
+                    if (e.getValue() instanceof AnnotationMirror mirror) {
+                        return (T) new MagicAnnotationElement(mirror, processingEnvironment);
+                    }
                     return (T) e.getValue();
                 })
                 .findFirst();

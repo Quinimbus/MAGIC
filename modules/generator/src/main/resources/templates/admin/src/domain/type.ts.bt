@@ -14,7 +14,8 @@ const {{typeNameLC}}Definition: TypeDefinition = {
             key: "{{field.name}}",
             label: "{{field.label}}",
             type: FieldType.{{field.fieldType}}{{if weak && field.owningField}},
-            owningField: {{field.owningField}}{{end}}
+            owningField: {{field.owningField}}{{end}}{{if field.hiddenInForm}},
+            hiddenInForm: true{{end}}
         },{{end}}
     ],
     keyField: "{{keyField}}",
