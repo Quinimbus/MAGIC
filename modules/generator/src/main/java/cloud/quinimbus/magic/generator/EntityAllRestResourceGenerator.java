@@ -9,6 +9,7 @@ import cloud.quinimbus.magic.classnames.Jakarta;
 import cloud.quinimbus.magic.classnames.QuiNimbusBinarystore;
 import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
+import cloud.quinimbus.magic.elements.MagicExecutableElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
 import cloud.quinimbus.magic.spec.MagicTypeSpec;
 import com.squareup.javapoet.AnnotationSpec;
@@ -19,13 +20,17 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGenerator {
 
-    public EntityAllRestResourceGenerator(MagicClassElement recordElement) {
+    private final List<MagicClassElement> entityMappers;
+
+    public EntityAllRestResourceGenerator(MagicClassElement recordElement, List<MagicClassElement> entityMappers) {
         super(recordElement);
+        this.entityMappers = entityMappers != null ? entityMappers : List.of();
     }
 
     public MagicTypeSpec generateAllResource() {
@@ -42,6 +47,11 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                             .addMember("value", "\"%s\"".formatted(IDs.toPlural(Records.idFromType(recordElement))))
                             .build());
         }
+        entityMappers.stream()
+                .map(e -> FieldSpec.builder(
+                                e.getType(), uncapitalize(e.getSimpleName()), Modifier.PRIVATE, Modifier.FINAL)
+                        .build())
+                .forEach(allResourceTypeBuilder::addField);
         this.recordElement
                 .findFieldsAnnotatedWith("cloud.quinimbus.persistence.api.annotation.Searchable")
                 .filter(ve -> ve.isClass(String.class))
@@ -49,6 +59,12 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
         this.recordElement
                 .findFieldsOfType(QuiNimbusBinarystore.EMBEDDABLE_BINARY)
                 .forEach(ve -> allResourceTypeBuilder.addMethod(createBinaryWither(ve)));
+        entityMappers.stream()
+                .flatMap(e -> e.findMethods())
+                .filter(m -> m.parameterCount() == 1)
+                .filter(m -> m.parameters().findFirst().orElseThrow().getType().equals(this.entityTypeName()))
+                .map(e -> createMappedAsMethod(e))
+                .forEach(allResourceTypeBuilder::addMethod);
         return new MagicTypeSpec(allResourceTypeBuilder.build(), packageName);
     }
 
@@ -62,37 +78,46 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
     }
 
     private MethodSpec constructor() {
+        var additionalParameters = entityMappers.stream()
+                .map(e -> ParameterSpec.builder(e.getType(), uncapitalize(e.getSimpleName()))
+                        .build())
+                .toList();
         var constructor = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
+        var code = CodeBlock.builder();
         if (weak()) {
             constructor
-                    .addParameter(ParameterSpec.builder(ParameterizedTypeName.get(Java.FUNCTION,
+                    .addParameter(ParameterSpec.builder(
+                                    ParameterizedTypeName.get(
+                                            Java.FUNCTION,
                                             Jakarta.RS_URIINFO,
                                             ParameterizedTypeName.get(Java.OPTIONAL, owningTypeName())),
                                     "owner")
                             .build())
                     .addParameter(
                             ParameterSpec.builder(repository(), "repository").build())
-                    .addCode(
-                            """
-                                 super(owner, repository);
-                                 this.repository = repository;
-                                 """)
                     .build();
+            code.add(
+                    """
+                    super(owner, repository);
+                    this.repository = repository;
+                    """);
         } else {
             constructor
                     .addAnnotation(Jakarta.INJECT)
                     .addParameter(
                             ParameterSpec.builder(repository(), "repository").build())
-                    .addCode(
-                            """
-                                 super($T.class, repository);
-                                 this.repository = repository;
-                                 """,
-                            entityTypeName())
-                    .addCode(initBinaryWither())
                     .build();
+            code.add(
+                    """
+                    super($T.class, repository);
+                    this.repository = repository;
+                    """,
+                    entityTypeName());
+            code.add(initBinaryWither());
         }
-        return constructor.build();
+        additionalParameters.forEach(constructor::addParameter);
+        additionalParameters.forEach(p -> code.add("this.%s = %s;".formatted(p.name, p.name)));
+        return constructor.addCode(code.build()).build();
     }
 
     private MethodSpec createByPropertyEndpoint(MagicVariableElement ve) {
@@ -164,5 +189,32 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                         e.getSimpleName(),
                         capitalize(e.getSimpleName())))
                 .collect(CodeBlock.joining(";"));
+    }
+
+    private MethodSpec createMappedAsMethod(MagicExecutableElement method) {
+        var returnType = method.returnType();
+        return MethodSpec.methodBuilder("as%s".formatted(returnType.getSimpleName()))
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH)
+                        .addMember("value", "\"/as/%s\"".formatted(uncapitalize(returnType.getSimpleName())))
+                        .build())
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PRODUCES)
+                        .addMember(
+                                "value",
+                                CodeBlock.builder()
+                                        .add("$T.APPLICATION_JSON", Jakarta.RS_MEDIATYPE)
+                                        .build())
+                        .build())
+                .addParameter(ParameterSpec.builder(Jakarta.RS_URIINFO, "uriInfo")
+                        .addAnnotation(
+                                AnnotationSpec.builder(Jakarta.RS_CONTEXT).build())
+                        .build())
+                .returns(Jakarta.RS_RESPONSE)
+                .addCode(
+                        "return getAllMapped($L::$L);",
+                        uncapitalize(method.enclosingElement().getSimpleName()),
+                        method.getSimpleName())
+                .build();
     }
 }

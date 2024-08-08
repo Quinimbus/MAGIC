@@ -1,6 +1,7 @@
 package cloud.quinimbus.magic.elements;
 
 import cloud.quinimbus.common.tools.NamedType;
+import com.squareup.javapoet.TypeName;
 import java.util.Optional;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
@@ -41,5 +42,9 @@ public abstract class AbstractMagicElementWrapper<E extends Element> implements 
     @Override
     public String toString() {
         return "%s(%s)".formatted(this.getClass().getSimpleName(), this.element);
+    }
+
+    public TypeName getType() {
+        return TypeName.get(this.element.asType());
     }
 }

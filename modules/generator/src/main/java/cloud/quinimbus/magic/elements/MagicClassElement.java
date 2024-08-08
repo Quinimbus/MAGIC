@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
@@ -39,6 +40,13 @@ public class MagicClassElement extends AbstractMagicElementWrapper<TypeElement> 
 
     public Stream<MagicVariableElement> findFieldsOfType(TypeName type) {
         return this.findFields().filter(ve -> ve.getType().equals(type));
+    }
+
+    public Stream<MagicExecutableElement> findMethods() {
+        return this.element.getEnclosedElements().stream()
+                .filter(e -> e.getKind().equals(ElementKind.METHOD))
+                .map(e -> (ExecutableElement) e)
+                .map(e -> new MagicExecutableElement(e, this.processingEnvironment));
     }
 
     @Override

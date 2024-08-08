@@ -15,15 +15,19 @@ public abstract class MagicClassProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment re) {
-        set.forEach(annotation -> {
-            var elements = re.getElementsAnnotatedWith(annotation).stream()
-                    .filter(element -> element instanceof TypeElement)
-                    .map(element -> new MagicClassElement((TypeElement) element, this.processingEnv))
-                    .collect(Collectors.toSet());
-            beforeProcessAll(annotation, elements);
-            elements.forEach(element -> process(annotation, element));
-            afterProcessAll(annotation, elements);
-        });
+        var elementsByAnnotation = set.stream()
+                .collect(Collectors.groupingBy(
+                        a -> a,
+                        Collectors.flatMapping(
+                                a -> re.getElementsAnnotatedWith(a).stream()
+                                        .filter(element -> element instanceof TypeElement)
+                                        .map(element ->
+                                                new MagicClassElement((TypeElement) element, this.processingEnv)),
+                                Collectors.toSet())));
+        set.forEach(annotation -> beforeProcessAll(annotation, elementsByAnnotation.get(annotation)));
+        set.forEach(
+                annotation -> elementsByAnnotation.get(annotation).forEach(element -> process(annotation, element)));
+        set.forEach(annotation -> afterProcessAll(annotation, elementsByAnnotation.get(annotation)));
         return false;
     }
 

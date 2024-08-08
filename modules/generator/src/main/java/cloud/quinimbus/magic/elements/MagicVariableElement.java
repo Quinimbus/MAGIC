@@ -1,6 +1,5 @@
 package cloud.quinimbus.magic.elements;
 
-import com.squareup.javapoet.TypeName;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -22,9 +21,5 @@ public class MagicVariableElement extends AbstractMagicElementWrapper<VariableEl
             }
         }
         return false;
-    }
-
-    public TypeName getType() {
-        return TypeName.get(this.element.asType());
     }
 }
