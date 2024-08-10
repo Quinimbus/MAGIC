@@ -2,6 +2,7 @@ package cloud.quinimbus.magic.generator;
 
 import cloud.quinimbus.magic.classnames.Jakarta;
 import cloud.quinimbus.magic.elements.MagicClassElement;
+import cloud.quinimbus.magic.util.CodeGeneratorUtil;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -18,7 +19,7 @@ public class RepositoryProducerGenerator {
     }
 
     public TypeSpec generateRepositoryProducerType() {
-        var producerTypeBuilder = TypeSpec.classBuilder("RepositoryProducer")
+        var producerTypeBuilder = CodeGeneratorUtil.classBuilder("RepositoryProducer", this.getClass())
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(ClassName.get("cloud.quinimbus.persistence.cdi", "AbstractRecordRepositoryProducer"))
                 .addAnnotation(Jakarta.APPLICATION_SCOPED)

@@ -19,7 +19,6 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeSpec;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
@@ -34,7 +33,7 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
     }
 
     public MagicTypeSpec generateAllResource() {
-        var allResourceTypeBuilder = TypeSpec.classBuilder(name + "AllResource")
+        var allResourceTypeBuilder = classBuilder(name + "AllResource")
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(superclass())
                 .addField(FieldSpec.builder(repository(), "repository", Modifier.PRIVATE, Modifier.FINAL)

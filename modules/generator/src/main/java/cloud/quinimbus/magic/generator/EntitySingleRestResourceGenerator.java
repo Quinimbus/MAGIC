@@ -18,7 +18,6 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeSpec;
 import java.util.List;
 import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
@@ -39,7 +38,7 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
     }
 
     public MagicTypeSpec generateSingleResource() {
-        var singleResourceTypeBuilder = TypeSpec.classBuilder(name + "SingleResource")
+        var singleResourceTypeBuilder = classBuilder(name + "SingleResource")
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(superclass())
                 .addMethod(constructor());

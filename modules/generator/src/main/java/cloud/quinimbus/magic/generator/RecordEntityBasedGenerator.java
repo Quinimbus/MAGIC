@@ -3,8 +3,10 @@ package cloud.quinimbus.magic.generator;
 import cloud.quinimbus.magic.classnames.QuiNimbusCommon;
 import cloud.quinimbus.magic.elements.MagicAnnotationElement;
 import cloud.quinimbus.magic.elements.MagicClassElement;
+import cloud.quinimbus.magic.util.CodeGeneratorUtil;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 import javax.lang.model.type.TypeMirror;
 
 public abstract class RecordEntityBasedGenerator {
@@ -71,5 +73,13 @@ public abstract class RecordEntityBasedGenerator {
 
     String ownerField() {
         return ownerField;
+    }
+
+    TypeSpec.Builder classBuilder(String name) {
+        return CodeGeneratorUtil.classBuilder(name, this.getClass());
+    }
+
+    TypeSpec.Builder interfaceBuilder(String name) {
+        return CodeGeneratorUtil.interfaceBuilder(name, this.getClass());
     }
 }

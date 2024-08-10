@@ -6,6 +6,8 @@ public class Java {
 
     public static final ClassName FUNCTION = ClassName.get("java.util.function", "Function");
 
+    public static final ClassName GENERATED = ClassName.get("javax.annotation.processing", "Generated");
+
     public static final ClassName OPTIONAL = ClassName.get("java.util", "Optional");
 
     public static final ClassName OVERRIDE = ClassName.get("java.lang", "Override");

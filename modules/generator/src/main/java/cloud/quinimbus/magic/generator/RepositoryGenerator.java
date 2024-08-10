@@ -1,18 +1,16 @@
 package cloud.quinimbus.magic.generator;
 
-import static cloud.quinimbus.magic.util.Strings.*;
-
 import cloud.quinimbus.magic.classnames.QuiNimbusPersistence;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
 import cloud.quinimbus.magic.spec.MagicTypeSpec;
+import static cloud.quinimbus.magic.util.Strings.*;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
 import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
 
@@ -23,7 +21,7 @@ public class RepositoryGenerator extends RecordEntityBasedGenerator {
     }
 
     public MagicTypeSpec generateRepositoryType() {
-        var repositoryTypeBuilder = TypeSpec.interfaceBuilder(name + "Repository")
+        var repositoryTypeBuilder = interfaceBuilder(name + "Repository")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(QuiNimbusPersistence.ENTITY_TYPE_CLASS)
                         .addMember("value", CodeBlock.of("$L.class", name))
