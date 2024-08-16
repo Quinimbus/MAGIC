@@ -2,12 +2,13 @@
 import { RouterView } from 'vue-router'
 import '@mdi/font/css/materialdesignicons.css'
 import entityTypeDefinitions from '@/domain'
+import { useAppConfigStore } from '@quinimbus/admin-ui'
 </script>
 
 <template>
   <v-card>
     <v-app>
-      <v-app-bar title="{{apptitle}}" />
+      <v-app-bar :title="useAppConfigStore().name" />
 
       <v-navigation-drawer expand-on-hover rail>
         <v-list-item
@@ -20,7 +21,7 @@ import entityTypeDefinitions from '@/domain'
 
       <v-main style="min-height: 300px;">
         <RouterView />
-        <v-footer>{{apptitle}} {{appversion}}</v-footer>
+        <v-footer>{{ useAppConfigStore().name }} {{ useAppConfigStore().version }}</v-footer>
       </v-main>
     </v-app>
   </v-card>

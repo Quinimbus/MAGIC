@@ -23,7 +23,7 @@ public class AdminSkeletonGenerator {
         try {
             generatePackageJson();
             generateIndexHtml();
-            generateAppVue();
+            generateInitialState();
             Files.createDirectories(adminUiPath.resolve("src/assets"));
             Files.createDirectories(adminUiPath.resolve("src/router"));
             copyFile("env.d.ts");
@@ -33,6 +33,7 @@ public class AdminSkeletonGenerator {
             copyFile("tsconfig.vitest.json");
             copyFile("vite.config.ts");
             copyFile("src/assets/main.css");
+            copyFile("src/App.vue");
             copyFile("src/main.ts");
             copyFile("src/router/index.ts");
         } catch (IOException ex) {
@@ -54,11 +55,11 @@ public class AdminSkeletonGenerator {
         templateRenderer.generateFromTemplate("index.html", context);
     }
 
-    private void generateAppVue() {
+    private void generateInitialState() {
         var context = new TemplateContext();
         context.set("apptitle", config.app().name());
         context.set("appversion", config.app().version());
-        templateRenderer.generateFromTemplate("src/App.vue", context);
+        templateRenderer.generateFromTemplate("src/initialState.ts", context);
     }
 
     private void copyFile(String path) {
