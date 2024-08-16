@@ -9,6 +9,7 @@
     
     <modules>
         <module>modules/annotations</module>
+        <module>modules/elements</module>
         <module>modules/generator</module>
     </modules>
     
