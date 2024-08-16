@@ -38,9 +38,13 @@ public class GenerateAdminListViewProcessor extends MagicClassProcessor {
                     .getParent()
                     .getParent();
             var configPath = rootPath.resolve("src/main/resources/META-INF/cloud.quinimbus.magic/admin-ui.yml");
-            try (var is = Files.newInputStream(configPath)) {
-                var mapper = new ObjectMapper(new YAMLFactory());
-                config = mapper.readValue(is, AdminUIConfig.class);
+            if (Files.exists(configPath)) {
+                try (var is = Files.newInputStream(configPath)) {
+                    var mapper = new ObjectMapper(new YAMLFactory());
+                    config = mapper.readValue(is, AdminUIConfig.class);
+                }
+            } else {
+                config = new AdminUIConfig(null, null, null);
             }
             var outPath = rootPath.resolve("target/magic/admin-ui/");
             srcPath = outPath.resolve("src");
