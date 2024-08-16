@@ -4,8 +4,10 @@ import static cloud.quinimbus.magic.util.Strings.*;
 
 import cloud.quinimbus.common.tools.IDs;
 import cloud.quinimbus.magic.classnames.QuiNimbusBinarystore;
+import cloud.quinimbus.magic.classnames.QuiNimbusCommon;
 import cloud.quinimbus.magic.config.AdminUIConfig;
 import cloud.quinimbus.magic.elements.MagicClassElement;
+import cloud.quinimbus.magic.util.Strings;
 import cloud.quinimbus.magic.util.TemplateRenderer;
 import io.marioslab.basis.template.TemplateContext;
 import java.nio.file.Path;
@@ -18,7 +20,7 @@ public class AdminListViewTypeGenerator extends RecordEntityBasedGenerator {
     private final TemplateRenderer templateRenderer;
 
     public static record TSField(
-            String name, String type, String label, String fieldType, boolean owningField, boolean hiddenInForm) {}
+            String name, String type, String label, String fieldType, boolean owningField, boolean hiddenInForm, String references) {}
 
     public AdminListViewTypeGenerator(MagicClassElement recordElement, Path domainPath, AdminUIConfig config) {
         super(recordElement);
@@ -55,7 +57,12 @@ public class AdminListViewTypeGenerator extends RecordEntityBasedGenerator {
                                 getFieldConfig(e.getSimpleName()).label(),
                                 toFieldType(e.getElement().asType().toString()),
                                 weak() && e.getSimpleName().equals(ownerField()),
-                                idFieldName.equals(e.getSimpleName()) ? idGenerated : false))
+                                idFieldName.equals(e.getSimpleName()) ? idGenerated : false,
+                                e.findAnnotation(QuiNimbusCommon.REFERENCES_ANNOTATION_NAME)
+                                        .flatMap(ae -> ae.<MagicClassElement>getElementValue("value")
+                                                .map(MagicClassElement::getSimpleName)
+                                                .map(Strings::uncapitalize))
+                                        .orElse(null)))
                         .toList());
         this.templateRenderer.generateFromTemplate("src/domain/type.ts", "%s.ts".formatted(capitalize(name)), context);
     }

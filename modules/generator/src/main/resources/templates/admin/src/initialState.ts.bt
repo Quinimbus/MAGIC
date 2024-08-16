@@ -1,9 +1,13 @@
-import { useAppConfigStore } from "@quinimbus/admin-ui";
+import { useAppConfigStore, useTypesStore } from "@quinimbus/admin-ui";
 import type { Pinia } from "pinia";
+import entityTypeDefinitions from "./domain";
 
 export default function initialState(pinia: Pinia) {
     const appConfig = useAppConfigStore(pinia);
     appConfig.setBasePath("http://localhost:8080");
     appConfig.setName("{{apptitle}}");
     appConfig.setVersion("{{appversion}}");
+
+    const types = useTypesStore(pinia);
+    entityTypeDefinitions.forEach((entityType) => types.addTypeDefinition(entityType));
 }

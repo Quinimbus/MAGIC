@@ -8,4 +8,6 @@ public class QuiNimbusCommon {
 
     public static final ClassName OWNER_ANNOTATION =
             ClassName.get("cloud.quinimbus.common.annotations.modelling", "Owner");
+
+    public static final String REFERENCES_ANNOTATION_NAME = "cloud.quinimbus.common.annotations.modelling.References";
 }
