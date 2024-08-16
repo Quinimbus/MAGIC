@@ -82,6 +82,7 @@ public class AdminListViewTypeGenerator extends RecordEntityBasedGenerator {
         var parsedType = parseType(type);
         return switch (parsedType.type()) {
             case "java.lang.String", "java.time.LocalDateTime", "java.time.LocalDate" -> "string";
+            case "java.lang.Boolean" -> "Boolean";
             case "java.util.List" -> "%s[]".formatted(toTSType(parsedType.genericParam));
             case "cloud.quinimbus.binarystore.persistence.EmbeddableBinary" -> "EmbeddableBinary | File";
             default -> "any";
@@ -93,6 +94,7 @@ public class AdminListViewTypeGenerator extends RecordEntityBasedGenerator {
         return switch (parsedType.type()) {
             case "java.lang.String" -> "STRING";
             case "java.lang.Integer" -> "NUMBER";
+            case "java.lang.Boolean" -> "BOOLEAN";
             case "java.time.LocalDate" -> "LOCALDATE";
             case "java.time.LocalDateTime" -> "LOCALDATETIME";
             case "cloud.quinimbus.binarystore.persistence.EmbeddableBinary" -> "BINARY";
