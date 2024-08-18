@@ -21,8 +21,10 @@ public abstract class MagicClassProcessor extends AbstractProcessor {
                         Collectors.flatMapping(
                                 a -> re.getElementsAnnotatedWith(a).stream()
                                         .filter(element -> element instanceof TypeElement)
-                                        .map(element ->
-                                                new MagicClassElement((TypeElement) element, this.processingEnv)),
+                                        .map(element -> new MagicClassElement(
+                                                (TypeElement) element,
+                                                this.processingEnv.getElementUtils(),
+                                                this.processingEnv.getTypeUtils())),
                                 Collectors.toSet())));
         set.forEach(annotation -> beforeProcessAll(annotation, elementsByAnnotation.get(annotation)));
         set.forEach(

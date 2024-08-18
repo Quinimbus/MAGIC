@@ -2,19 +2,22 @@ package cloud.quinimbus.magic.elements;
 
 import java.util.Map;
 import java.util.Optional;
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 
 public class MagicAnnotationElement {
 
     private final AnnotationMirror annotationMirror;
-    private final ProcessingEnvironment processingEnvironment;
+    private final Elements elementUtils;
+    private final Types typeUtils;
 
-    public MagicAnnotationElement(AnnotationMirror annotationMirror, ProcessingEnvironment processingEnvironment) {
+    public MagicAnnotationElement(AnnotationMirror annotationMirror, Elements elementUtils, Types typeUtils) {
         this.annotationMirror = annotationMirror;
-        this.processingEnvironment = processingEnvironment;
+        this.elementUtils = elementUtils;
+        this.typeUtils = typeUtils;
     }
 
     public AnnotationMirror getAnnotationMirror() {
@@ -30,8 +33,7 @@ public class MagicAnnotationElement {
     }
 
     public String getPackageName() {
-        return this.processingEnvironment
-                .getElementUtils()
+        return this.elementUtils
                 .getPackageOf(this.annotationMirror.getAnnotationType().asElement())
                 .toString();
     }
@@ -41,19 +43,16 @@ public class MagicAnnotationElement {
     }
 
     public <T> Optional<T> getElementValue(String elementName) {
-        return this.processingEnvironment
-                .getElementUtils()
-                .getElementValuesWithDefaults(this.annotationMirror)
-                .entrySet()
-                .stream()
+        return this.elementUtils.getElementValuesWithDefaults(this.annotationMirror).entrySet().stream()
                 .filter(e -> e.getKey().getSimpleName().toString().equals(elementName))
                 .map(Map.Entry::getValue)
                 .map(e -> {
                     if (e.getValue() instanceof DeclaredType type) {
-                        return (T) new MagicClassElement((TypeElement) type.asElement(), processingEnvironment);
+                        return (T) new MagicClassElement(
+                                (TypeElement) type.asElement(), this.elementUtils, this.typeUtils);
                     }
                     if (e.getValue() instanceof AnnotationMirror mirror) {
-                        return (T) new MagicAnnotationElement(mirror, processingEnvironment);
+                        return (T) new MagicAnnotationElement(mirror, this.elementUtils, this.typeUtils);
                     }
                     return (T) e.getValue();
                 })

@@ -1,16 +1,17 @@
 package cloud.quinimbus.magic.elements;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 
 public class MagicVariableElement extends AbstractMagicElementWrapper<VariableElement> {
 
     private final VariableElement element;
 
-    public MagicVariableElement(VariableElement element, ProcessingEnvironment processingEnvironment) {
-        super(element, processingEnvironment);
+    public MagicVariableElement(VariableElement element, Elements elementUtil, Types typeUtils) {
+        super(element, elementUtil, typeUtils);
         this.element = element;
     }
 

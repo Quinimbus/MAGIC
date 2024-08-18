@@ -3,25 +3,24 @@ package cloud.quinimbus.magic.elements;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import java.util.stream.Stream;
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 
 public class MagicExecutableElement extends AbstractMagicElementWrapper<ExecutableElement> {
 
     private final ExecutableElement element;
-    private final ProcessingEnvironment processingEnvironment;
 
-    public MagicExecutableElement(ExecutableElement element, ProcessingEnvironment processingEnvironment) {
-        super(element, processingEnvironment);
+    public MagicExecutableElement(ExecutableElement element, Elements elementUtils, Types typeUtils) {
+        super(element, elementUtils, typeUtils);
         this.element = element;
-        this.processingEnvironment = processingEnvironment;
     }
 
     public Stream<MagicVariableElement> parameters() {
         return this.element.getParameters().stream()
-                .map(ve -> new MagicVariableElement(ve, this.processingEnvironment));
+                .map(ve -> new MagicVariableElement(ve, this.elementUtils(), this.typeUtils()));
     }
 
     public int parameterCount() {
@@ -30,8 +29,9 @@ public class MagicExecutableElement extends AbstractMagicElementWrapper<Executab
 
     public MagicClassElement returnType() {
         return new MagicClassElement(
-                (TypeElement) this.processingEnvironment.getTypeUtils().asElement(this.element.getReturnType()),
-                processingEnvironment);
+                (TypeElement) this.typeUtils().asElement(this.element.getReturnType()),
+                this.elementUtils(),
+                this.typeUtils());
     }
 
     public boolean returns(TypeName typeName) {
@@ -42,6 +42,7 @@ public class MagicExecutableElement extends AbstractMagicElementWrapper<Executab
     }
 
     public MagicClassElement enclosingElement() {
-        return new MagicClassElement((TypeElement) this.element.getEnclosingElement(), this.processingEnvironment);
+        return new MagicClassElement(
+                (TypeElement) this.element.getEnclosingElement(), this.elementUtils(), this.typeUtils());
     }
 }
