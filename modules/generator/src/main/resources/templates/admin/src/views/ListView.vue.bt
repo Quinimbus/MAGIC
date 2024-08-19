@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { {{typeNameLC}}Definition, {{typeNameUC}} } from '@/domain'
-import { EntityView, RestBasedEntityListDataSource } from '@quinimbus/admin-ui';
+import { {{if hasBinaryField}}BinaryTypeView, {{end}}{{if hasBooleanField}}BooleanTypeView, {{end}}EntityView, RestBasedEntityListDataSource{{if hasReferenceField}}, ReferenceTypeView{{end}} } from '@quinimbus/admin-ui';
 import { useAppConfigStore } from '@quinimbus/admin-ui';
 
 const basePath = useAppConfigStore().basePath;
@@ -9,5 +9,13 @@ const entityFactory = () => new {{typeNameUC}}();
 </script>
 
 <template>
-    <EntityView :type="{{typeNameLC}}Definition" :datasource="datasource" :entity-factory="entityFactory" />
+    <EntityView :type="{{typeNameLC}}Definition" :datasource="datasource" :entity-factory="entityFactory">
+        {{for field in fields}}{{if field.fieldType == "BINARY"}}<template v-slot:item.{{field.nameLC}}="{ value }">
+            <BinaryTypeView :model-value="value" />
+        </template>{{end}}{{if field.fieldType == "BOOLEAN"}}<template v-slot:item.{{field.nameLC}}="{ value }">
+            <BooleanTypeView :model-value="value" />
+        </template>{{end}}{{if field.references != null}}<template v-slot:item.{{field.nameLC}}="{ value }">
+            <ReferenceTypeView :model-value="value" reference-type="{{field.references}}" />
+        </template>{{end}}{{end}}
+    </EntityView>
 </template>

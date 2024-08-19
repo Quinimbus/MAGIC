@@ -2,6 +2,7 @@ package cloud.quinimbus.magic.elements;
 
 import com.squareup.javapoet.TypeName;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -43,6 +44,28 @@ public class MagicClassElement extends AbstractMagicElementWrapper<TypeElement> 
                 .filter(e -> e.getKind().equals(ElementKind.METHOD))
                 .map(e -> (ExecutableElement) e)
                 .map(e -> new MagicExecutableElement(e, this.elementUtils(), this.typeUtils()));
+    }
+
+    public String getQualifiedName() {
+        return this.element.getQualifiedName().toString();
+    }
+
+    public Optional<MagicClassElement> superclass() {
+        return Optional.ofNullable(this.element.getSuperclass())
+                .map(this.typeUtils()::asElement)
+                .map(e -> new MagicClassElement((TypeElement) e, this.elementUtils(), this.typeUtils()));
+    }
+
+    public boolean isEnum() {
+        return superclass()
+                .filter(e -> "java.lang.Enum".equals(e.getQualifiedName()))
+                .isPresent();
+    }
+
+    public Stream<String> enumValues() {
+        return this.element.getEnclosedElements().stream()
+                .filter(e -> e.getKind().equals(ElementKind.ENUM_CONSTANT))
+                .map(Object::toString);
     }
 
     @Override

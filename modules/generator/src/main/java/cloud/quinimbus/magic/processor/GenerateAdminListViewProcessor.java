@@ -65,7 +65,7 @@ public class GenerateAdminListViewProcessor extends MagicClassProcessor {
             Files.createDirectories(viewsPath);
             var typegen = new AdminListViewTypeGenerator(element, domainPath, config);
             typegen.generateType();
-            var viewgen = new AdminListViewGenerator(element, viewsPath);
+            var viewgen = new AdminListViewGenerator(element, viewsPath, config);
             viewgen.generateView();
         } catch (IOException ex) {
             throw new IllegalStateException(ex);
