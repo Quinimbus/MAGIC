@@ -1,0 +1,24 @@
+FROM node:{{nodeVersion}} AS builder
+
+ARG NODE_ENV
+ENV NODE_ENV $NODE_ENV
+
+WORKDIR /app
+COPY package{{adminUiLocal ? "-docker" : ""}}.json /app/package.json
+{{if adminUiLocal}}COPY quinimbus-admin-ui-local.tgz /tmp
+{{end}}RUN npm install
+
+COPY env.d.ts /app
+COPY index.html /app
+COPY tsconfig* /app
+COPY vite.config.ts /app
+COPY src /app/src
+RUN npm run build
+
+FROM nginx:{{nginxVersion}}
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+COPY docker/nginx.default.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record AdminUIConfig(App app, Map<String, Type> types, AdminUiDependencyConfig adminUiDependency) {
+public record AdminUIConfig(App app, Map<String, Type> types, Dependencies dependencies) {
 
     public AdminUIConfig {
         if (app == null) {
@@ -13,15 +13,30 @@ public record AdminUIConfig(App app, Map<String, Type> types, AdminUiDependencyC
         if (types == null) {
             types = Map.of();
         }
-        if (adminUiDependency == null) {
-            adminUiDependency = new AdminUiDependencyConfig("0.0.0");
+        if (dependencies == null) {
+            dependencies = new Dependencies(null, null, null);
         }
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static record AdminUiDependencyConfig(String version) {
+    public static record Dependencies(Dependency adminUi, Dependency nginx, Dependency node) {
+        public Dependencies {
+            if (adminUi == null) {
+                adminUi = new Dependency("0.0.0");
+            }
+            if (nginx == null) {
+                nginx = new Dependency("1.27.1");
+            }
+            if (node == null) {
+                node = new Dependency("22.6.0");
+            }
+        }
+    }
 
-        public AdminUiDependencyConfig {
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static record Dependency(String version) {
+
+        public Dependency {
             if (version == null || version.isBlank()) {
                 version = "0.0.0";
             }
