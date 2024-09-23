@@ -33,6 +33,7 @@ public class AdminSkeletonGenerator {
             Files.createDirectories(adminUiPath.resolve("src/assets"));
             Files.createDirectories(adminUiPath.resolve("src/router"));
             copyFile("docker/nginx.default.conf");
+            copyFile(".npmrc");
             copyFile("env.d.ts");
             copyFile("tsconfig.json");
             copyFile("tsconfig.app.json");
