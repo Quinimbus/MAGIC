@@ -8,6 +8,7 @@ COPY package{{adminUiLocal ? "-docker" : ""}}.json /app/package.json
 {{if adminUiLocal}}COPY quinimbus-admin-ui-local.tgz /tmp
 {{end}}RUN npm install
 
+COPY .npmrc /app
 COPY env.d.ts /app
 COPY index.html /app
 COPY tsconfig* /app
