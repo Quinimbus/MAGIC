@@ -1,5 +1,6 @@
 package cloud.quinimbus.magic.generator;
 
+import cloud.quinimbus.magic.classnames.QuiNimbusCommon;
 import cloud.quinimbus.magic.classnames.QuiNimbusPersistence;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
@@ -34,7 +35,7 @@ public class RepositoryGenerator extends RecordEntityBasedGenerator {
                     ParameterizedTypeName.get(QuiNimbusPersistence.CRUD_REPOSITORY, entityTypeName(), idTypeName()));
         }
         recordElement
-                .findFieldsAnnotatedWith("cloud.quinimbus.persistence.api.annotation.Searchable")
+                .findFieldsAnnotatedWith(QuiNimbusCommon.SEARCHABLE_ANNOTATION_NAME)
                 .forEach(ve -> repositoryTypeBuilder.addMethod(createFindAllByMethod(ve)));
         return new MagicTypeSpec(repositoryTypeBuilder.build(), packageName);
     }

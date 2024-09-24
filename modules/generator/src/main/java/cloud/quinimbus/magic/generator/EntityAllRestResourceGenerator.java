@@ -7,6 +7,7 @@ import cloud.quinimbus.common.tools.Records;
 import cloud.quinimbus.magic.classnames.Java;
 import cloud.quinimbus.magic.classnames.Jakarta;
 import cloud.quinimbus.magic.classnames.QuiNimbusBinarystore;
+import cloud.quinimbus.magic.classnames.QuiNimbusCommon;
 import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.elements.MagicExecutableElement;
@@ -52,7 +53,7 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                         .build())
                 .forEach(allResourceTypeBuilder::addField);
         this.recordElement
-                .findFieldsAnnotatedWith("cloud.quinimbus.persistence.api.annotation.Searchable")
+                .findFieldsAnnotatedWith(QuiNimbusCommon.SEARCHABLE_ANNOTATION_NAME)
                 .filter(ve -> ve.isClass(String.class))
                 .forEach(ve -> allResourceTypeBuilder.addMethod(createByPropertyEndpoint(ve)));
         this.recordElement
