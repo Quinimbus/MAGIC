@@ -4,13 +4,12 @@ import static cloud.quinimbus.magic.util.Strings.*;
 
 import cloud.quinimbus.common.tools.IDs;
 import cloud.quinimbus.common.tools.Records;
-import cloud.quinimbus.magic.classnames.Java;
 import cloud.quinimbus.magic.classnames.Jakarta;
+import cloud.quinimbus.magic.classnames.Java;
 import cloud.quinimbus.magic.classnames.QuiNimbusBinarystore;
 import cloud.quinimbus.magic.classnames.QuiNimbusCommon;
 import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
-import cloud.quinimbus.magic.elements.MagicExecutableElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
 import cloud.quinimbus.magic.spec.MagicTypeSpec;
 import com.squareup.javapoet.AnnotationSpec;
@@ -26,9 +25,9 @@ import javax.lang.model.element.Modifier;
 
 public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGenerator {
 
-    private final List<MagicClassElement> entityMappers;
+    private final List<EntityMapperDefinition> entityMappers;
 
-    public EntityAllRestResourceGenerator(MagicClassElement recordElement, List<MagicClassElement> entityMappers) {
+    public EntityAllRestResourceGenerator(MagicClassElement recordElement, List<EntityMapperDefinition> entityMappers) {
         super(recordElement);
         this.entityMappers = entityMappers != null ? entityMappers : List.of();
     }
@@ -48,8 +47,7 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                             .build());
         }
         entityMappers.stream()
-                .map(e -> FieldSpec.builder(
-                                e.getType(), uncapitalize(e.getSimpleName()), Modifier.PRIVATE, Modifier.FINAL)
+                .map(e -> FieldSpec.builder(e.type(), uncapitalize(e.name()), Modifier.PRIVATE, Modifier.FINAL)
                         .build())
                 .forEach(allResourceTypeBuilder::addField);
         this.recordElement
@@ -60,9 +58,7 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                 .findFieldsOfType(QuiNimbusBinarystore.EMBEDDABLE_BINARY)
                 .forEach(ve -> allResourceTypeBuilder.addMethod(createBinaryWither(ve)));
         entityMappers.stream()
-                .flatMap(e -> e.findMethods())
-                .filter(m -> m.parameterCount() == 1)
-                .filter(m -> m.parameters().findFirst().orElseThrow().getType().equals(this.entityTypeName()))
+                .flatMap(e -> e.methods().stream())
                 .map(e -> createMappedAsMethod(e))
                 .forEach(allResourceTypeBuilder::addMethod);
         return new MagicTypeSpec(allResourceTypeBuilder.build(), packageName);
@@ -79,8 +75,8 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
 
     private MethodSpec constructor() {
         var additionalParameters = entityMappers.stream()
-                .map(e -> ParameterSpec.builder(e.getType(), uncapitalize(e.getSimpleName()))
-                        .build())
+                .map(e ->
+                        ParameterSpec.builder(e.type(), uncapitalize(e.name())).build())
                 .toList();
         var constructor = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
         var code = CodeBlock.builder();
@@ -128,12 +124,14 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                         .addMember("value", "\"/by/%s/{%s}\"".formatted(ve.getSimpleName(), ve.getSimpleName()))
                         .build())
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PRODUCES)
-                        .addMember("value",
+                        .addMember(
+                                "value",
                                 CodeBlock.builder()
                                         .add("$T.APPLICATION_JSON", Jakarta.RS_MEDIATYPE)
                                         .build())
                         .build())
-                .addParameter(ParameterSpec.builder(ClassName.get(ve.getElement().asType()), ve.getSimpleName())
+                .addParameter(
+                        ParameterSpec.builder(ClassName.get(ve.getElement().asType()), ve.getSimpleName())
                                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH_PARAM)
                                         .addMember("value", "\"%s\"".formatted(ve.getSimpleName()))
                                         .build())
@@ -191,13 +189,12 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                 .collect(CodeBlock.joining(";"));
     }
 
-    private MethodSpec createMappedAsMethod(MagicExecutableElement method) {
-        var returnType = method.returnType();
-        return MethodSpec.methodBuilder("as%s".formatted(returnType.getSimpleName()))
+    private MethodSpec createMappedAsMethod(EntityMapperDefinition.Method method) {
+        return MethodSpec.methodBuilder("as%s".formatted(method.returnType()))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH)
-                        .addMember("value", "\"/as/%s\"".formatted(uncapitalize(returnType.getSimpleName())))
+                        .addMember("value", "\"/as/%s\"".formatted(uncapitalize(method.returnType())))
                         .build())
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PRODUCES)
                         .addMember(
@@ -211,10 +208,7 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                                 AnnotationSpec.builder(Jakarta.RS_CONTEXT).build())
                         .build())
                 .returns(Jakarta.RS_RESPONSE)
-                .addCode(
-                        "return getAllMapped($L::$L);",
-                        uncapitalize(method.enclosingElement().getSimpleName()),
-                        method.getSimpleName())
+                .addCode("return getAllMapped($L::$L);", uncapitalize(method.mapperName()), method.methodName())
                 .build();
     }
 }

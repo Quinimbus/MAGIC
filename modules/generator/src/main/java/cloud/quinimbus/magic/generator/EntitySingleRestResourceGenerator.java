@@ -1,5 +1,7 @@
 package cloud.quinimbus.magic.generator;
 
+import static cloud.quinimbus.magic.util.Strings.*;
+
 import cloud.quinimbus.common.tools.IDs;
 import cloud.quinimbus.common.tools.Records;
 import cloud.quinimbus.magic.classnames.Jakarta;
@@ -7,10 +9,8 @@ import cloud.quinimbus.magic.classnames.Java;
 import cloud.quinimbus.magic.classnames.QuiNimbusBinarystore;
 import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
-import cloud.quinimbus.magic.elements.MagicExecutableElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
 import cloud.quinimbus.magic.spec.MagicTypeSpec;
-import static cloud.quinimbus.magic.util.Strings.*;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -26,12 +26,12 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
 
     private final List<MagicClassElement> entityChildren;
 
-    private final List<MagicClassElement> entityMappers;
+    private final List<EntityMapperDefinition> entityMappers;
 
     public EntitySingleRestResourceGenerator(
             MagicClassElement recordElement,
             List<MagicClassElement> entityChildren,
-            List<MagicClassElement> entityMappers) {
+            List<EntityMapperDefinition> entityMappers) {
         super(recordElement);
         this.entityChildren = entityChildren != null ? entityChildren : List.of();
         this.entityMappers = entityMappers != null ? entityMappers : List.of();
@@ -67,17 +67,14 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .flatMap(child -> Stream.of(createSubResourceAllMethod(child), createSubResourceSingleMethod(child)))
                 .forEach(singleResourceTypeBuilder::addMethod);
         entityMappers.stream()
-                .map(e -> FieldSpec.builder(
-                                e.getType(), uncapitalize(e.getSimpleName()), Modifier.PRIVATE, Modifier.FINAL)
+                .map(e -> FieldSpec.builder(e.type(), uncapitalize(e.name()), Modifier.PRIVATE, Modifier.FINAL)
                         .build())
                 .forEach(singleResourceTypeBuilder::addField);
         this.recordElement
                 .findFieldsOfType(QuiNimbusBinarystore.EMBEDDABLE_BINARY)
                 .forEach(ve -> singleResourceTypeBuilder.addMethod(createBinaryDownload(ve)));
         entityMappers.stream()
-                .flatMap(e -> e.findMethods())
-                .filter(m -> m.parameterCount() == 1)
-                .filter(m -> m.parameters().findFirst().orElseThrow().getType().equals(this.entityTypeName()))
+                .flatMap(e -> e.methods().stream())
                 .map(e -> createMappedAsMethod(e))
                 .forEach(singleResourceTypeBuilder::addMethod);
         return new MagicTypeSpec(singleResourceTypeBuilder.build(), packageName);
@@ -99,9 +96,8 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                                         repository(e),
                                         uncapitalize(repository(e).simpleName()))
                                 .build()),
-                        entityMappers.stream()
-                                .map(e -> ParameterSpec.builder(e.getType(), uncapitalize(e.getSimpleName()))
-                                        .build()))
+                        entityMappers.stream().map(e -> ParameterSpec.builder(e.type(), uncapitalize(e.name()))
+                                .build()))
                 .toList();
         var constructor = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
         var code = CodeBlock.builder();
@@ -179,13 +175,12 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .build();
     }
 
-    private MethodSpec createMappedAsMethod(MagicExecutableElement method) {
-        var returnType = method.returnType();
-        return MethodSpec.methodBuilder("as%s".formatted(returnType.getSimpleName()))
+    private MethodSpec createMappedAsMethod(EntityMapperDefinition.Method method) {
+        return MethodSpec.methodBuilder("as%s".formatted(method.returnType()))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH)
-                        .addMember("value", "\"/as/%s\"".formatted(uncapitalize(returnType.getSimpleName())))
+                        .addMember("value", "\"/as/%s\"".formatted(uncapitalize(method.returnType())))
                         .build())
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PRODUCES)
                         .addMember(
@@ -201,8 +196,8 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .returns(Jakarta.RS_RESPONSE)
                 .addCode(
                         "return getByIdMapped(uriInfo, $L::$L);",
-                        uncapitalize(method.enclosingElement().getSimpleName()),
-                        method.getSimpleName())
+                        uncapitalize(method.mapperName()),
+                        method.methodName())
                 .build();
     }
 }
