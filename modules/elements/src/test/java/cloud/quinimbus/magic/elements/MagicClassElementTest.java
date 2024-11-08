@@ -1,5 +1,7 @@
 package cloud.quinimbus.magic.elements;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.karuslabs.elementary.junit.Tools;
 import com.karuslabs.elementary.junit.ToolsExtension;
 import com.karuslabs.elementary.junit.annotations.Generation;
@@ -10,7 +12,6 @@ import com.squareup.javapoet.TypeName;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(ToolsExtension.class)
