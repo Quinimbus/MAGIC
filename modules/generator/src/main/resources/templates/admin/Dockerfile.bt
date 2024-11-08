@@ -12,7 +12,7 @@ COPY package{{adminUiLocal ? "-docker" : ""}}.json /app/package.json
 COPY env.d.ts /app
 COPY index.html /app
 COPY tsconfig* /app
-COPY vite.config.ts /app
+COPY vite.config.mts /app
 COPY src /app/src
 RUN npm run build
 

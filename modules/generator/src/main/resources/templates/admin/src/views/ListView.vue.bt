@@ -9,13 +9,5 @@ const entityFactory = () => new {{typeNameUC}}();
 </script>
 
 <template>
-    <EntityView :type="{{typeNameLC}}Definition" :datasource="datasource" :entity-factory="entityFactory">
-        {{for field in fields}}{{if field.fieldType == "BINARY"}}<template v-slot:item.{{field.nameLC}}="{ value }">
-            <BinaryTypeView :model-value="value" />
-        </template>{{end}}{{if field.fieldType == "BOOLEAN"}}<template v-slot:item.{{field.nameLC}}="{ value }">
-            <BooleanTypeView :model-value="value" />
-        </template>{{end}}{{if field.references != null}}<template v-slot:item.{{field.nameLC}}="{ value }">
-            <ReferenceTypeView :model-value="value" reference-type="{{field.references}}" />
-        </template>{{end}}{{end}}
-    </EntityView>
+    <EntityView :type="{{typeNameLC}}Definition" :datasource="datasource" :entity-factory="entityFactory" />
 </template>

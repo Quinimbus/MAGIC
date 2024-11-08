@@ -1,42 +1,38 @@
-import './assets/main.css'
-
 import { createApp, nextTick } from 'vue'
 import { createPinia } from 'pinia'
+import { PrimeVue } from '@primevue/core'
+import Aura from '@primevue/themes/aura';
+import ConfirmationService from 'primevue/confirmationservice';
+import ToastService from 'primevue/toastservice';
 
 import App from './App.vue'
 import router from './router'
 
-import 'vuetify/styles'
-import { createVuetify } from 'vuetify'
-import * as components from 'vuetify/components'
-import * as directives from 'vuetify/directives'
-import { md3 } from 'vuetify/blueprints'
-import { aliases, mdi } from 'vuetify/iconsets/mdi'
 import initialState from './initialState'
 
-const vuetify = createVuetify({
-    components,
-    directives,
-    blueprint: md3,
-    icons: {
-        defaultSet: 'mdi',
-        aliases,
-        sets: {
-            mdi
-        }
-    },
-    theme: {
-        defaultTheme: 'dark'
-    }
-})
+import '@/assets/styles.scss';
+import '@/assets/tailwind.css';
 
 const app = createApp(App)
 const pinia = createPinia()
 
 app.use(pinia)
     .use(router)
-    .use(vuetify)
+    .use(ConfirmationService)
+    .use(ToastService)
+    .use(PrimeVue, {
+        theme: {
+            preset: Aura,
+            options: {
+                darkModeSelector: '.app-dark'
+            }
+        }
+    })
 
 initialState(pinia)
+
+if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.documentElement.classList.add('app-dark')
+}
 
 app.mount('#app')

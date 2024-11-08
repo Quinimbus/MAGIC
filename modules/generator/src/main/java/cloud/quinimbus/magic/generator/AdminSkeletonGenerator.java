@@ -38,12 +38,15 @@ public class AdminSkeletonGenerator {
             copyFile("docker/nginx.default.conf");
             copyFile(".npmrc");
             copyFile("env.d.ts");
+            copyFile("postcss.config.js");
+            copyFile("tailwind.config.js");
             copyFile("tsconfig.json");
             copyFile("tsconfig.app.json");
             copyFile("tsconfig.node.json");
             copyFile("tsconfig.vitest.json");
-            copyFile("vite.config.ts");
-            copyFile("src/assets/main.css");
+            copyFile("vite.config.mts");
+            copyFile("src/assets/styles.scss");
+            copyFile("src/assets/tailwind.css");
             copyFile("src/App.vue");
             copyFile("src/main.ts");
             copyFile("src/router/index.ts");
