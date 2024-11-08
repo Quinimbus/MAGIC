@@ -25,4 +25,9 @@ public class MagicTypeSpec {
     public TypeSpec getTypeSpec() {
         return this.typeSpec;
     }
+
+    @Override
+    public String toString() {
+        return "MagicTypeSpec(packageName=%s, typeSpec=%s)".formatted(this.packageName, this.typeSpec);
+    }
 }
