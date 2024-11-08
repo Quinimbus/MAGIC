@@ -8,17 +8,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Map;
 
 public class AdminSkeletonGenerator {
 
     private final Path adminUiPath;
     private final AdminUIConfig config;
     private final TemplateRenderer templateRenderer;
+    private final Map<String, String> processorOptions;
 
-    public AdminSkeletonGenerator(Path adminUiPath, AdminUIConfig config) {
+    public AdminSkeletonGenerator(Path adminUiPath, AdminUIConfig config, Map<String, String> processorOptions) {
         this.adminUiPath = adminUiPath;
         this.config = config;
         this.templateRenderer = new TemplateRenderer(adminUiPath);
+        this.processorOptions = processorOptions;
     }
 
     public void generateSkeleton() {
@@ -58,7 +61,10 @@ public class AdminSkeletonGenerator {
         var context = new TemplateContext();
         context.set("appname", config.app().name());
         context.set("appversion", config.app().version());
-        context.set("adminuidependency", config.dependencies().adminUi().version());
+        var adminUiDependencyVersion = this.processorOptions.getOrDefault(
+                "qn.magic.admin-ui.dependencies.adminUi.version",
+                config.dependencies().adminUi().version());
+        context.set("adminuidependency", adminUiDependencyVersion);
         templateRenderer.generateFromTemplate("package.json", context);
         if (additionalDockerVariant) {
             context.set("adminuidependency", "file:/tmp/quinimbus-admin-ui-local.tgz");

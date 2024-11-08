@@ -49,7 +49,7 @@ public class GenerateAdminListViewProcessor extends MagicClassProcessor {
             var outPath = rootPath.resolve("target/magic/admin-ui/");
             srcPath = outPath.resolve("src");
             Files.createDirectories(srcPath);
-            var skeletonGen = new AdminSkeletonGenerator(outPath, config);
+            var skeletonGen = new AdminSkeletonGenerator(outPath, config, this.processingEnv.getOptions());
             skeletonGen.generateSkeleton();
         } catch (IOException ex) {
             throw new IllegalStateException(ex);
