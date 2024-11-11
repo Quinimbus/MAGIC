@@ -20,7 +20,6 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGenerator {
@@ -156,37 +155,6 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
         }
         method.addCode(code);
         return method.build();
-    }
-
-    private MethodSpec createBinaryWither(MagicVariableElement ve) {
-        var constructorParams = this.recordElement
-                .findFields()
-                .map(field -> {
-                    if (field.getSimpleName().equals(ve.getSimpleName())) {
-                        return ve.getSimpleName();
-                    } else {
-                        return "entity.%s()".formatted(field.getSimpleName());
-                    }
-                })
-                .collect(Collectors.joining(", "));
-        return MethodSpec.methodBuilder("withBinaryFor%s".formatted(capitalize(ve.getSimpleName())))
-                .addModifiers(Modifier.PRIVATE)
-                .addParameter(ParameterSpec.builder(entityTypeName(), "entity").build())
-                .addParameter(ParameterSpec.builder(QuiNimbusBinarystore.EMBEDDABLE_BINARY, ve.getSimpleName())
-                        .build())
-                .addCode("return new $T($L);", entityTypeName(), constructorParams)
-                .returns(entityTypeName())
-                .build();
-    }
-
-    private CodeBlock initBinaryWither() {
-        return this.recordElement
-                .findFieldsOfType(QuiNimbusBinarystore.EMBEDDABLE_BINARY)
-                .map(e -> CodeBlock.of(
-                        "super.addBinaryWither(\"$L\", this::withBinaryFor$L);",
-                        e.getSimpleName(),
-                        capitalize(e.getSimpleName())))
-                .collect(CodeBlock.joining(";"));
     }
 
     private MethodSpec createMappedAsMethod(EntityMapperDefinition.Method method) {

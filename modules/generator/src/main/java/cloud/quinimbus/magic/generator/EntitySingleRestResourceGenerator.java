@@ -73,6 +73,9 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
         this.recordElement
                 .findFieldsOfType(QuiNimbusBinarystore.EMBEDDABLE_BINARY)
                 .forEach(ve -> singleResourceTypeBuilder.addMethod(createBinaryDownload(ve)));
+        this.recordElement
+                .findFieldsOfType(QuiNimbusBinarystore.EMBEDDABLE_BINARY)
+                .forEach(ve -> singleResourceTypeBuilder.addMethod(createBinaryWither(ve)));
         entityMappers.stream()
                 .flatMap(e -> e.methods().stream())
                 .map(e -> createMappedAsMethod(e))
@@ -113,6 +116,7 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
         } else {
             constructor.addAnnotation(Jakarta.INJECT);
             code.add("super($T.class, $T.class, repository);", entityTypeName(), idTypeName());
+            code.add(initBinaryWither());
         }
         constructor.addParameter(ParameterSpec.builder(ClassName.get(packageName, name + "Repository"), "repository")
                 .build());
