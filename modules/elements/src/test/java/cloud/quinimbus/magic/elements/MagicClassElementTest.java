@@ -37,6 +37,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
                     A, B, C
                 }
                 """
+            }),
+    @Inline(
+            name = "my.pack.MyTestClassWithGenericField",
+            source = {
+                """
+                package my.pack;
+
+                import java.util.List;
+
+                public class MyTestClassWithGenericField {
+                    private final List<String> list;
+                }
+                """
             })
 })
 @Generation(
@@ -60,5 +73,12 @@ public class MagicClassElementTest {
         var mce = new MagicClassElement(element, Tools.elements(), Tools.types());
         assertTrue(mce.isEnum());
         assertEquals(Set.of("A", "B", "C"), mce.enumValues().collect(Collectors.toSet()));
+    }
+
+    @Test
+    public void testGenericField() {
+        var element = Tools.elements().getTypeElement("my.pack.MyTestClassWithGenericField");
+        var mce = new MagicClassElement(element, Tools.elements(), Tools.types());
+        mce.findFields().forEach(e -> System.out.println(e.typeElement().getElement()));
     }
 }
