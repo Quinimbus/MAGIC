@@ -74,8 +74,14 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .findFieldsOfType(QuiNimbusBinarystore.EMBEDDABLE_BINARY)
                 .forEach(ve -> singleResourceTypeBuilder.addMethod(createBinaryDownload(ve)));
         this.recordElement
+                .findFieldsOfType(ParameterizedTypeName.get(Java.LIST, QuiNimbusBinarystore.EMBEDDABLE_BINARY))
+                .forEach(ve -> singleResourceTypeBuilder.addMethod(createListBinaryDownload(ve)));
+        this.recordElement
                 .findFieldsOfType(QuiNimbusBinarystore.EMBEDDABLE_BINARY)
                 .forEach(ve -> singleResourceTypeBuilder.addMethod(createBinaryWither(ve)));
+        this.recordElement
+                .findFieldsOfType(ParameterizedTypeName.get(Java.LIST, QuiNimbusBinarystore.EMBEDDABLE_BINARY))
+                .forEach(ve -> singleResourceTypeBuilder.addMethod(createBinaryListWither(ve)));
         entityMappers.stream()
                 .flatMap(e -> e.methods().stream())
                 .map(e -> createMappedAsMethod(e))
@@ -112,16 +118,16 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                                     ParameterizedTypeName.get(Java.OPTIONAL, owningTypeName())),
                             "owner")
                     .build());
-            code.add("super($T.class, $T.class, owner, repository);", entityTypeName(), idTypeName());
+            code.addStatement("super($T.class, $T.class, owner, repository)", entityTypeName(), idTypeName());
         } else {
             constructor.addAnnotation(Jakarta.INJECT);
-            code.add("super($T.class, $T.class, repository);", entityTypeName(), idTypeName());
+            code.addStatement("super($T.class, $T.class, repository)", entityTypeName(), idTypeName());
             code.add(initBinaryWither());
         }
         constructor.addParameter(ParameterSpec.builder(ClassName.get(packageName, name + "Repository"), "repository")
                 .build());
         additionalParameters.forEach(constructor::addParameter);
-        additionalParameters.forEach(p -> code.add("this.%s = %s;".formatted(p.name, p.name)));
+        additionalParameters.forEach(p -> code.addStatement("this.%s = %s".formatted(p.name, p.name)));
         return constructor.addCode(code.build()).build();
     }
 
@@ -176,6 +182,24 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                         .build())
                 .returns(Jakarta.RS_RESPONSE)
                 .addCode("return downloadBinary(uriInfo, $T::$L);", entityTypeName(), field.getSimpleName())
+                .build();
+    }
+
+    private MethodSpec createListBinaryDownload(MagicVariableElement field) {
+        return MethodSpec.methodBuilder("download%s".formatted(capitalize(field.getSimpleName())))
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH)
+                        .addMember(
+                                "value",
+                                "\"/%s/{binaryPropertyIndex}/download\"".formatted(uncapitalize(field.getSimpleName())))
+                        .build())
+                .addParameter(ParameterSpec.builder(Jakarta.RS_URIINFO, "uriInfo")
+                        .addAnnotation(
+                                AnnotationSpec.builder(Jakarta.RS_CONTEXT).build())
+                        .build())
+                .returns(Jakarta.RS_RESPONSE)
+                .addCode("return downloadBinaryFromList(uriInfo, $T::$L);", entityTypeName(), field.getSimpleName())
                 .build();
     }
 

@@ -56,6 +56,9 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
         this.recordElement
                 .findFieldsOfType(QuiNimbusBinarystore.EMBEDDABLE_BINARY)
                 .forEach(ve -> allResourceTypeBuilder.addMethod(createBinaryWither(ve)));
+        this.recordElement
+                .findFieldsOfType(ParameterizedTypeName.get(Java.LIST, QuiNimbusBinarystore.EMBEDDABLE_BINARY))
+                .forEach(ve -> allResourceTypeBuilder.addMethod(createBinaryListWither(ve)));
         entityMappers.stream()
                 .flatMap(e -> e.methods().stream())
                 .map(e -> createMappedAsMethod(e))
@@ -91,27 +94,20 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                     .addParameter(
                             ParameterSpec.builder(repository(), "repository").build())
                     .build();
-            code.add(
-                    """
-                    super(owner, repository);
-                    this.repository = repository;
-                    """);
+            code.addStatement("super(owner, repository)");
+            code.addStatement("this.repository = repository");
         } else {
             constructor
                     .addAnnotation(Jakarta.INJECT)
                     .addParameter(
                             ParameterSpec.builder(repository(), "repository").build())
                     .build();
-            code.add(
-                    """
-                    super($T.class, repository);
-                    this.repository = repository;
-                    """,
-                    entityTypeName());
+            code.addStatement("super($T.class, repository)", entityTypeName());
+            code.addStatement("this.repository = repository;");
             code.add(initBinaryWither());
         }
         additionalParameters.forEach(constructor::addParameter);
-        additionalParameters.forEach(p -> code.add("this.%s = %s;".formatted(p.name, p.name)));
+        additionalParameters.forEach(p -> code.addStatement("this.%s = %s".formatted(p.name, p.name)));
         return constructor.addCode(code.build()).build();
     }
 

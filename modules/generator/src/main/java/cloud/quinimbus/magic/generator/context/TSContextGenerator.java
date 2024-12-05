@@ -116,7 +116,7 @@ public class TSContextGenerator {
         return switch (classElement.getQualifiedName()) {
             case "java.lang.String", "java.time.LocalDateTime", "java.time.LocalDate" -> "string";
             case "java.lang.Boolean" -> "Boolean";
-            case "java.util.List" -> "%s[]".formatted(toTSType(typeParameter[0], name));
+            case "java.util.List" -> "(%s)[]".formatted(toTSType(typeParameter[0], name));
             case "cloud.quinimbus.binarystore.persistence.EmbeddableBinary" -> "EmbeddableBinary | File";
             default -> {
                 if (classElement.isEnum()) {
@@ -128,15 +128,20 @@ public class TSContextGenerator {
     }
 
     private static String toFieldType(MagicVariableElement ve) {
-        return switch (ve.typeElement().getQualifiedName()) {
+        return toFieldType(ve.typeElement(), ve.typeParameters().findAny().orElse(null));
+    }
+
+    private static String toFieldType(MagicClassElement type, MagicClassElement parameter) {
+        return switch (type.getQualifiedName()) {
             case "java.lang.String" -> "STRING";
             case "java.lang.Integer" -> "NUMBER";
             case "java.lang.Boolean" -> "BOOLEAN";
             case "java.time.LocalDate" -> "LOCALDATE";
             case "java.time.LocalDateTime" -> "LOCALDATETIME";
             case "cloud.quinimbus.binarystore.persistence.EmbeddableBinary" -> "BINARY";
+            case "java.util.List" -> "LIST_" + toFieldType(parameter, null);
             default -> {
-                if (ve.typeElement().isEnum()) {
+                if (type.isEnum()) {
                     yield "SELECTION";
                 }
                 yield "UNKNOWN";

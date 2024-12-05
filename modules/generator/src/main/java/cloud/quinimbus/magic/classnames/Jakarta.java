@@ -27,4 +27,7 @@ public class Jakarta {
     public static final ClassName RS_RESPONSE = ClassName.get("jakarta.ws.rs.core", "Response");
 
     public static final ClassName RS_URIINFO = ClassName.get("jakarta.ws.rs.core", "UriInfo");
+
+    public static final ClassName RS_WEBAPPLICATIONEXCEPTION =
+            ClassName.get("jakarta.ws.rs", "WebApplicationException");
 }
