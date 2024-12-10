@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
@@ -32,6 +33,9 @@ public class GenerateRestEndpointsProcessor extends MagicClassProcessor {
     private Map<MagicClassElement, List<MagicClassElement>> entityChildren = new LinkedHashMap<>();
 
     private Map<MagicClassElement, List<EntityMapperDefinition>> entityMappers = new LinkedHashMap<>();
+
+    @Override
+    public void setup(RoundEnvironment re) {}
 
     @Override
     public void beforeProcessAll(TypeElement annotation, Set<MagicClassElement> elements) {

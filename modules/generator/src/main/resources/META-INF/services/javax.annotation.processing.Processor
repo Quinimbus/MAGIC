@@ -1,3 +1,4 @@
+cloud.quinimbus.magic.processor.GenerateMainProcessor
 cloud.quinimbus.magic.processor.GenerateAdminListViewProcessor
 cloud.quinimbus.magic.processor.GenerateRepositoryProcessor
 cloud.quinimbus.magic.processor.GenerateRestEndpointsProcessor

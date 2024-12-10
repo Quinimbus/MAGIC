@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
@@ -18,6 +19,9 @@ public class GenerateRepositoryProcessor extends MagicClassProcessor {
 
     @Override
     public void beforeProcessAll(TypeElement annotation, Set<MagicClassElement> elements) {}
+
+    @Override
+    public void setup(RoundEnvironment re) {}
 
     @Override
     public void process(TypeElement annotation, MagicClassElement element) {

@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
+import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
@@ -25,6 +26,9 @@ public class GenerateAdminListViewProcessor extends MagicClassProcessor {
     private AdminUIConfig config;
 
     private Path srcPath;
+
+    @Override
+    public void setup(RoundEnvironment re) {}
 
     @Override
     public void beforeProcessAll(TypeElement annotation, Set<MagicClassElement> elements) {

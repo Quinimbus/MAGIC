@@ -26,12 +26,15 @@ public abstract class MagicClassProcessor extends AbstractProcessor {
                                                 this.processingEnv.getElementUtils(),
                                                 this.processingEnv.getTypeUtils())),
                                 Collectors.toSet())));
+        setup(re);
         set.forEach(annotation -> beforeProcessAll(annotation, elementsByAnnotation.get(annotation)));
         set.forEach(
                 annotation -> elementsByAnnotation.get(annotation).forEach(element -> process(annotation, element)));
         set.forEach(annotation -> afterProcessAll(annotation, elementsByAnnotation.get(annotation)));
         return false;
     }
+
+    public abstract void setup(RoundEnvironment re);
 
     public abstract void beforeProcessAll(TypeElement annotation, Set<MagicClassElement> elements);
 
