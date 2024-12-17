@@ -22,7 +22,7 @@ public record AdminUIConfig(App app, Map<String, Type> types, Dependencies depen
     public static record Dependencies(Dependency adminUi, Dependency nginx, Dependency node) {
         public Dependencies {
             if (adminUi == null) {
-                adminUi = new Dependency("0.0.0");
+                adminUi = new Dependency("0.1.0");
             }
             if (nginx == null) {
                 nginx = new Dependency("1.27.1");
