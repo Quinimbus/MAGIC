@@ -61,7 +61,12 @@ public record AdminUIConfig(App app, Map<String, Type> types, Dependencies depen
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static record Type(
-            String icon, String labelSingular, String labelPlural, String keyField, Map<String, Field> fields) {
+            String icon,
+            String labelSingular,
+            String labelPlural,
+            String keyField,
+            Map<String, Field> fields,
+            Map<String, GlobalAction> globalActions) {
 
         public Type {
             if (icon == null || icon.isBlank()) {
@@ -75,4 +80,15 @@ public record AdminUIConfig(App app, Map<String, Type> types, Dependencies depen
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static record Field(String label) {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static record GlobalAction(String label, String icon) {
+        public GlobalAction withLabel(String label) {
+            return new cloud.quinimbus.magic.config.AdminUIConfig.GlobalAction(label, icon);
+        }
+
+        public GlobalAction withIcon(String icon) {
+            return new cloud.quinimbus.magic.config.AdminUIConfig.GlobalAction(label, icon);
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package cloud.quinimbus.magic.elements;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import java.util.Objects;
 import java.util.Optional;
@@ -66,6 +67,10 @@ public class MagicClassElement extends AbstractMagicElementWrapper<TypeElement> 
         return this.element.getEnclosedElements().stream()
                 .filter(e -> e.getKind().equals(ElementKind.ENUM_CONSTANT))
                 .map(Object::toString);
+    }
+
+    public ClassName getClassName() {
+        return ClassName.get(this.element);
     }
 
     @Override

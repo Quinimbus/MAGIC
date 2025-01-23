@@ -3,10 +3,12 @@ package cloud.quinimbus.magic.processor;
 import cloud.quinimbus.magic.classnames.QuiNimbusCommon;
 import cloud.quinimbus.magic.classnames.QuiNimbusMagic;
 import cloud.quinimbus.magic.elements.MagicClassElement;
+import cloud.quinimbus.magic.elements.MagicExecutableElement;
 import cloud.quinimbus.magic.generator.EntityAllRestResourceGenerator;
 import cloud.quinimbus.magic.generator.EntityMapperDefinition;
 import cloud.quinimbus.magic.generator.EntityNamingMapperGenerator;
 import cloud.quinimbus.magic.generator.EntitySingleRestResourceGenerator;
+import cloud.quinimbus.magic.generator.RecordContextActionDefinition;
 import cloud.quinimbus.magic.spec.MagicTypeSpec;
 import com.squareup.javapoet.ClassName;
 import java.io.IOException;
@@ -25,7 +27,8 @@ import org.apache.commons.lang3.function.Failable;
 
 @SupportedAnnotationTypes({
     QuiNimbusMagic.GENERATE_REST_ENDPOINTS,
-    QuiNimbusMagic.ADD_MAPPER_TO_GENERATED_REST_ENDPOINT_NAME
+    QuiNimbusMagic.ADD_MAPPER_TO_GENERATED_REST_ENDPOINT_NAME,
+    QuiNimbusCommon.ACTION_NAME
 })
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class GenerateRestEndpointsProcessor extends MagicClassProcessor {
@@ -34,19 +37,24 @@ public class GenerateRestEndpointsProcessor extends MagicClassProcessor {
 
     private Map<MagicClassElement, List<EntityMapperDefinition>> entityMappers = new LinkedHashMap<>();
 
+    private Map<MagicClassElement, Set<RecordContextActionDefinition>> recordContextActions = new LinkedHashMap<>();
+
     @Override
     public void setup(RoundEnvironment re) {}
 
     @Override
-    public void beforeProcessAll(TypeElement annotation, Set<MagicClassElement> elements) {
-        entityChildren.putAll(elements.stream()
+    public void beforeProcessAll(
+            TypeElement annotation,
+            Set<MagicClassElement> typeElements,
+            Set<MagicExecutableElement> executableElements) {
+        entityChildren.putAll(typeElements.stream()
                 .filter(e -> e.isAnnotatedWith(QuiNimbusMagic.GENERATE_REST_ENDPOINTS))
                 .filter(e -> e.isAnnotatedWith(QuiNimbusCommon.OWNER_ANNOTATION_NAME))
                 .collect(Collectors.groupingBy(e -> e.findAnnotation(QuiNimbusCommon.OWNER_ANNOTATION_NAME)
                         .flatMap(a -> a.getElementValue("owningEntity"))
                         .map(MagicClassElement.class::cast)
                         .orElseThrow())));
-        entityMappers.putAll(elements.stream()
+        entityMappers.putAll(typeElements.stream()
                 .filter(e -> e.isAnnotatedWith(QuiNimbusMagic.ADD_MAPPER_TO_GENERATED_REST_ENDPOINT_NAME))
                 .collect(Collectors.groupingBy(
                         e -> e.findAnnotation(QuiNimbusMagic.ADD_MAPPER_TO_GENERATED_REST_ENDPOINT_NAME)
@@ -54,6 +62,7 @@ public class GenerateRestEndpointsProcessor extends MagicClassProcessor {
                                 .map(MagicClassElement.class::cast)
                                 .orElseThrow(),
                         Collectors.mapping(this::toMapperDefinition, Collectors.toList()))));
+        recordContextActions.putAll(RecordContextActionDefinition.fromExecutableElements(executableElements));
     }
 
     @Override
@@ -70,7 +79,8 @@ public class GenerateRestEndpointsProcessor extends MagicClassProcessor {
                 var singleGen = new EntitySingleRestResourceGenerator(
                         element, entityChildren.get(element), entityMappers.get(element));
                 this.writeTypeFile(singleGen.generateSingleResource());
-                var allGen = new EntityAllRestResourceGenerator(element, entityMappers.get(element));
+                var allGen = new EntityAllRestResourceGenerator(
+                        element, entityMappers.get(element), recordContextActions.get(element));
                 this.writeTypeFile(allGen.generateAllResource());
             } catch (IOException ex) {
                 throw new IllegalStateException(ex);
@@ -86,7 +96,10 @@ public class GenerateRestEndpointsProcessor extends MagicClassProcessor {
     }
 
     @Override
-    public void afterProcessAll(TypeElement annotation, Set<MagicClassElement> elements) {}
+    public void afterProcessAll(
+            TypeElement annotation,
+            Set<MagicClassElement> typeElements,
+            Set<MagicExecutableElement> executableElements) {}
 
     private EntityMapperDefinition toMapperDefinition(MagicClassElement element) {
         var recordElement = element.findAnnotation(QuiNimbusMagic.ADD_MAPPER_TO_GENERATED_REST_ENDPOINT_NAME)

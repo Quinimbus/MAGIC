@@ -1,6 +1,7 @@
 package cloud.quinimbus.magic.processor;
 
 import cloud.quinimbus.magic.elements.MagicClassElement;
+import cloud.quinimbus.magic.elements.MagicExecutableElement;
 import cloud.quinimbus.magic.generator.MainClassGenerator;
 import java.io.IOException;
 import java.util.Set;
@@ -31,11 +32,17 @@ public class GenerateMainProcessor extends MagicClassProcessor {
     }
 
     @Override
-    public void beforeProcessAll(TypeElement annotation, Set<MagicClassElement> elements) {}
+    public void beforeProcessAll(
+            TypeElement annotation,
+            Set<MagicClassElement> typeElements,
+            Set<MagicExecutableElement> executableElements) {}
 
     @Override
     public void process(TypeElement annotation, MagicClassElement element) {}
 
     @Override
-    public void afterProcessAll(TypeElement annotation, Set<MagicClassElement> elements) {}
+    public void afterProcessAll(
+            TypeElement annotation,
+            Set<MagicClassElement> typeElements,
+            Set<MagicExecutableElement> executableElements) {}
 }

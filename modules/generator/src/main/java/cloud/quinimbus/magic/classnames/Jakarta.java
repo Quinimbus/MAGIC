@@ -22,6 +22,8 @@ public class Jakarta {
 
     public static final ClassName RS_PATH_PARAM = ClassName.get("jakarta.ws.rs", "PathParam");
 
+    public static final ClassName RS_POST = ClassName.get("jakarta.ws.rs", "POST");
+
     public static final ClassName RS_PRODUCES = ClassName.get("jakarta.ws.rs", "Produces");
 
     public static final ClassName RS_RESPONSE = ClassName.get("jakarta.ws.rs.core", "Response");

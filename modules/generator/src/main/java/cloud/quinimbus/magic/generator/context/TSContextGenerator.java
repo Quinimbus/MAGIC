@@ -1,7 +1,5 @@
 package cloud.quinimbus.magic.generator.context;
 
-import static cloud.quinimbus.magic.util.Strings.*;
-
 import cloud.quinimbus.common.tools.IDs;
 import cloud.quinimbus.magic.classnames.QuiNimbusBinarystore;
 import cloud.quinimbus.magic.classnames.QuiNimbusCommon;
@@ -10,6 +8,7 @@ import cloud.quinimbus.magic.config.AdminUIConfigLoader;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
 import cloud.quinimbus.magic.util.Strings;
+import static cloud.quinimbus.magic.util.Strings.*;
 import io.marioslab.basis.template.TemplateContext;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +29,8 @@ public class TSContextGenerator {
             String enumName,
             List<TSAllowedValue> allowedValues) {}
 
+    public static record GlobalAction(String key, String label, String icon) {}
+
     public static TemplateContext createTypeContext(
             AdminUIConfig.Type typeConfig,
             MagicClassElement recordElement,
@@ -38,7 +39,8 @@ public class TSContextGenerator {
             boolean weak,
             String ownerField,
             boolean idGenerated,
-            String idFieldName) {
+            String idFieldName,
+            List<String> globalActions) {
         var context = new TemplateContext();
         context.set("keyField", typeConfig.keyField());
         context.set("icon", typeConfig.icon());
@@ -109,6 +111,14 @@ public class TSContextGenerator {
                                 .isPresent())
                         .findAny()
                         .isPresent());
+        context.set(
+                "globalActions",
+                globalActions.stream()
+                        .map(a -> {
+                            var config = AdminUIConfigLoader.getGlobalActionConfig(typeConfig, a);
+                            return new GlobalAction(a, config.label(), config.icon());
+                        })
+                        .toList());
         return context;
     }
 

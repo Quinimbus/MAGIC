@@ -1,7 +1,5 @@
 package cloud.quinimbus.magic.generator;
 
-import static cloud.quinimbus.magic.util.Strings.*;
-
 import cloud.quinimbus.common.tools.IDs;
 import cloud.quinimbus.common.tools.Records;
 import cloud.quinimbus.magic.classnames.Jakarta;
@@ -12,6 +10,7 @@ import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
 import cloud.quinimbus.magic.spec.MagicTypeSpec;
+import static cloud.quinimbus.magic.util.Strings.*;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -20,15 +19,24 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
 
 public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGenerator {
 
     private final List<EntityMapperDefinition> entityMappers;
 
-    public EntityAllRestResourceGenerator(MagicClassElement recordElement, List<EntityMapperDefinition> entityMappers) {
+    private final Set<RecordContextActionDefinition> recordContextActionDefinitions;
+
+    public EntityAllRestResourceGenerator(
+            MagicClassElement recordElement,
+            List<EntityMapperDefinition> entityMappers,
+            Set<RecordContextActionDefinition> recordContextActionDefinitions) {
         super(recordElement);
         this.entityMappers = entityMappers != null ? entityMappers : List.of();
+        this.recordContextActionDefinitions =
+                recordContextActionDefinitions != null ? recordContextActionDefinitions : Set.of();
     }
 
     public MagicTypeSpec generateAllResource() {
@@ -49,6 +57,11 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                 .map(e -> FieldSpec.builder(e.type(), uncapitalize(e.name()), Modifier.PRIVATE, Modifier.FINAL)
                         .build())
                 .forEach(allResourceTypeBuilder::addField);
+        recordContextActionDefinitions.stream()
+                .map(e -> FieldSpec.builder(
+                                e.type(), uncapitalize(e.type().simpleName()), Modifier.PRIVATE, Modifier.FINAL)
+                        .build())
+                .forEach(allResourceTypeBuilder::addField);
         this.recordElement
                 .findFieldsAnnotatedWith(QuiNimbusCommon.SEARCHABLE_ANNOTATION_NAME)
                 .filter(ve -> ve.isClass(String.class))
@@ -63,6 +76,9 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                 .flatMap(e -> e.methods().stream())
                 .map(e -> createMappedAsMethod(e))
                 .forEach(allResourceTypeBuilder::addMethod);
+        recordContextActionDefinitions.stream()
+                .map(e -> createActionMethod(e))
+                .forEach(allResourceTypeBuilder::addMethod);
         return new MagicTypeSpec(allResourceTypeBuilder.build(), packageName);
     }
 
@@ -76,9 +92,13 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
     }
 
     private MethodSpec constructor() {
-        var additionalParameters = entityMappers.stream()
-                .map(e ->
-                        ParameterSpec.builder(e.type(), uncapitalize(e.name())).build())
+        var additionalParameters = Stream.concat(
+                        entityMappers.stream().map(e -> ParameterSpec.builder(e.type(), uncapitalize(e.name()))
+                                .build()),
+                        recordContextActionDefinitions.stream().map(e -> ParameterSpec.builder(
+                                        e.type(), uncapitalize(e.type().simpleName()))
+                                .build()))
+                .distinct()
                 .toList();
         var constructor = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
         var code = CodeBlock.builder();
@@ -173,6 +193,20 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                         .build())
                 .returns(Jakarta.RS_RESPONSE)
                 .addCode("return getAllMapped($L::$L);", uncapitalize(method.mapperName()), method.methodName())
+                .build();
+    }
+
+    private MethodSpec createActionMethod(RecordContextActionDefinition definition) {
+        return MethodSpec.methodBuilder("callAction%s".formatted(capitalize(definition.name())))
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_POST).build())
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH)
+                        .addMember("value", "\"/action/%s\"".formatted(uncapitalize(definition.name())))
+                        .build())
+                .addCode(
+                        "this.$L.$L();",
+                        uncapitalize(definition.type().simpleName()),
+                        definition.method().name())
                 .build();
     }
 }

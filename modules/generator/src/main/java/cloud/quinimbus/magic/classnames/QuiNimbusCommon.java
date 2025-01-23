@@ -4,12 +4,17 @@ import com.squareup.javapoet.ClassName;
 
 public class QuiNimbusCommon {
 
+    public static final String ACTION_NAME = "cloud.quinimbus.common.annotations.business.Action";
+
     public static final String OWNER_ANNOTATION_NAME = "cloud.quinimbus.common.annotations.modelling.Owner";
 
     public static final ClassName OWNER_ANNOTATION =
             ClassName.get("cloud.quinimbus.common.annotations.modelling", "Owner");
 
     public static final String NAMING_ANNOTATION_NAME = "cloud.quinimbus.common.annotations.modelling.Naming";
+
+    public static final String RECORD_TYPE_CONTEXT_NAME =
+            "cloud.quinimbus.common.annotations.business.RecordTypeContext";
 
     public static final String REFERENCES_ANNOTATION_NAME = "cloud.quinimbus.common.annotations.modelling.References";
 
