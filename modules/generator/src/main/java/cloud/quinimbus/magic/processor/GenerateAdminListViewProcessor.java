@@ -27,7 +27,7 @@ import javax.tools.StandardLocation;
 import org.apache.commons.lang3.RandomStringUtils;
 
 @SupportedAnnotationTypes({QuiNimbusMagic.GENERATE_ADMIN_LIST_VIEW_NAME, QuiNimbusCommon.ACTION_NAME})
-@SupportedSourceVersion(SourceVersion.RELEASE_21)
+@SupportedSourceVersion(SourceVersion.RELEASE_23)
 public class GenerateAdminListViewProcessor extends MagicClassProcessor {
 
     private AdminUIConfig config;

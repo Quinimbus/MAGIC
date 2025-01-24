@@ -30,7 +30,7 @@ import org.apache.commons.lang3.function.Failable;
     QuiNimbusMagic.ADD_MAPPER_TO_GENERATED_REST_ENDPOINT_NAME,
     QuiNimbusCommon.ACTION_NAME
 })
-@SupportedSourceVersion(SourceVersion.RELEASE_21)
+@SupportedSourceVersion(SourceVersion.RELEASE_23)
 public class GenerateRestEndpointsProcessor extends MagicClassProcessor {
 
     private Map<MagicClassElement, List<MagicClassElement>> entityChildren = new LinkedHashMap<>();
