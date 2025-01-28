@@ -8,6 +8,7 @@ import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
 import static cloud.quinimbus.magic.util.Strings.capitalize;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
@@ -104,6 +105,48 @@ public class AbstractEntityRestResourceGenerator extends RecordEntityBasedGenera
                         .build())
                 .addCode("return new $T($L);", entityTypeName(), constructorParams)
                 .returns(entityTypeName())
+                .build();
+    }
+
+    AnnotationSpec path(String path) {
+        return AnnotationSpec.builder(Jakarta.RS_PATH)
+                .addMember("value", CodeBlock.of("$S", path))
+                .build();
+    }
+
+    AnnotationSpec producesJson() {
+        return AnnotationSpec.builder(Jakarta.RS_PRODUCES)
+                .addMember(
+                        "value",
+                        CodeBlock.builder()
+                                .add("$T.APPLICATION_JSON", Jakarta.RS_MEDIATYPE)
+                                .build())
+                .build();
+    }
+
+    AnnotationSpec consumesJson() {
+        return AnnotationSpec.builder(Jakarta.RS_CONSUMES)
+                .addMember(
+                        "value",
+                        CodeBlock.builder()
+                                .add("$T.APPLICATION_JSON", Jakarta.RS_MEDIATYPE)
+                                .build())
+                .build();
+    }
+
+    AnnotationSpec consumesMultipart() {
+        return AnnotationSpec.builder(Jakarta.RS_CONSUMES)
+                .addMember(
+                        "value",
+                        CodeBlock.builder()
+                                .add("$T.MULTIPART_FORM_DATA", Jakarta.RS_MEDIATYPE)
+                                .build())
+                .build();
+    }
+
+    ParameterSpec injectUriInfo() {
+        return ParameterSpec.builder(Jakarta.RS_URIINFO, "uriInfo")
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_CONTEXT).build())
                 .build();
     }
 }

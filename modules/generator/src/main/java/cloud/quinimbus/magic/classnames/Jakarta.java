@@ -12,7 +12,13 @@ public class Jakarta {
 
     public static final ClassName PRODUCES = ClassName.get("jakarta.enterprise.inject", "Produces");
 
+    public static final ClassName RS_CONSUMES = ClassName.get("jakarta.ws.rs", "Consumes");
+
     public static final ClassName RS_CONTEXT = ClassName.get("jakarta.ws.rs.core", "Context");
+
+    public static final ClassName RS_DELETE = ClassName.get("jakarta.ws.rs", "DELETE");
+
+    public static final ClassName RS_ENTITY_PART = ClassName.get("jakarta.ws.rs.core", "EntityPart");
 
     public static final ClassName RS_GET = ClassName.get("jakarta.ws.rs", "GET");
 
@@ -25,6 +31,8 @@ public class Jakarta {
     public static final ClassName RS_POST = ClassName.get("jakarta.ws.rs", "POST");
 
     public static final ClassName RS_PRODUCES = ClassName.get("jakarta.ws.rs", "Produces");
+
+    public static final ClassName RS_PUT = ClassName.get("jakarta.ws.rs", "PUT");
 
     public static final ClassName RS_RESPONSE = ClassName.get("jakarta.ws.rs.core", "Response");
 

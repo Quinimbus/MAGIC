@@ -1,7 +1,5 @@
 package cloud.quinimbus.magic.generator;
 
-import static cloud.quinimbus.magic.util.Strings.*;
-
 import cloud.quinimbus.common.tools.IDs;
 import cloud.quinimbus.common.tools.Records;
 import cloud.quinimbus.magic.classnames.Jakarta;
@@ -11,6 +9,7 @@ import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
 import cloud.quinimbus.magic.spec.MagicTypeSpec;
+import static cloud.quinimbus.magic.util.Strings.*;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -41,13 +40,15 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
         var singleResourceTypeBuilder = classBuilder(name + "SingleResource")
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(superclass())
-                .addMethod(constructor());
+                .addMethod(constructor())
+                .addMethod(createGetById(weak()))
+                .addMethod(createReplace())
+                .addMethod(createDeleteById());
         if (!weak()) {
             singleResourceTypeBuilder
                     .addAnnotation(Jakarta.REQUEST_SCOPED)
-                    .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH)
-                            .addMember("value", "\"%s/{%s}\"".formatted(Records.idFromType(recordElement), name + "Id"))
-                            .build());
+                    .addAnnotation(path("%s/{%s}".formatted(Records.idFromType(recordElement), name + "Id")))
+                    .addMethod(createReplaceByMultipart());
         }
         singleResourceTypeBuilder.addMethod(MethodSpec.methodBuilder("idPathParameter")
                 .addModifiers(Modifier.PUBLIC)
@@ -136,9 +137,7 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
         var resourceClass = ClassName.get(child.getPackageName(), "%sAllResource".formatted(child.getSimpleName()));
         return MethodSpec.methodBuilder("subResource%s".formatted(capitalize(pluralName)))
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH)
-                        .addMember("value", "\"/%s/\"".formatted(uncapitalize(pluralName)))
-                        .build())
+                .addAnnotation(path("/%s/".formatted(uncapitalize(pluralName))))
                 .returns(resourceClass)
                 .addCode(CodeBlock.of(
                         """
@@ -154,11 +153,7 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
         var resourceClass = ClassName.get(child.getPackageName(), "%sSingleResource".formatted(child.getSimpleName()));
         return MethodSpec.methodBuilder("subResource%s".formatted(capitalize(singluarName)))
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH)
-                        .addMember(
-                                "value",
-                                "\"/%s/{%s}/\"".formatted(uncapitalize(singluarName), child.getSimpleName() + "Id"))
-                        .build())
+                .addAnnotation(path("/%s/{%s}/".formatted(uncapitalize(singluarName), child.getSimpleName() + "Id")))
                 .returns(resourceClass)
                 .addCode(CodeBlock.of(
                         """
@@ -169,17 +164,58 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .build();
     }
 
+    private MethodSpec createGetById(boolean uriInfoParameter) {
+        var method = MethodSpec.methodBuilder("getById")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
+                .addAnnotation(producesJson())
+                .addParameter(injectUriInfo())
+                .returns(Jakarta.RS_RESPONSE)
+                .addStatement("return super.getById(uriInfo)");
+        return method.build();
+    }
+
+    private MethodSpec createReplace() {
+        return MethodSpec.methodBuilder("replace")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PUT).build())
+                .addAnnotation(consumesJson())
+                .addParameter(ParameterSpec.builder(entityTypeName(), "entity").build())
+                .returns(Jakarta.RS_RESPONSE)
+                .addStatement("return super.replace(entity)")
+                .build();
+    }
+
+    private MethodSpec createReplaceByMultipart() {
+        return MethodSpec.methodBuilder("replaceByMultipart")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PUT).build())
+                .addAnnotation(consumesMultipart())
+                .addParameter(
+                        ParameterSpec.builder(ParameterizedTypeName.get(Java.LIST, Jakarta.RS_ENTITY_PART), "parts")
+                                .build())
+                .returns(Jakarta.RS_RESPONSE)
+                .addException(Java.IO_EXCEPTION)
+                .addStatement("return super.replaceByMultipart(parts)")
+                .build();
+    }
+
+    private MethodSpec createDeleteById() {
+        return MethodSpec.methodBuilder("deleteById")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_DELETE).build())
+                .addParameter(injectUriInfo())
+                .returns(Jakarta.RS_RESPONSE)
+                .addStatement("return super.deleteById(uriInfo)")
+                .build();
+    }
+
     private MethodSpec createBinaryDownload(MagicVariableElement field) {
         return MethodSpec.methodBuilder("download%s".formatted(capitalize(field.getSimpleName())))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
-                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH)
-                        .addMember("value", "\"/%s/download\"".formatted(uncapitalize(field.getSimpleName())))
-                        .build())
-                .addParameter(ParameterSpec.builder(Jakarta.RS_URIINFO, "uriInfo")
-                        .addAnnotation(
-                                AnnotationSpec.builder(Jakarta.RS_CONTEXT).build())
-                        .build())
+                .addAnnotation(path("/%s/download".formatted(uncapitalize(field.getSimpleName()))))
+                .addParameter(injectUriInfo())
                 .returns(Jakarta.RS_RESPONSE)
                 .addCode("return downloadBinary(uriInfo, $T::$L);", entityTypeName(), field.getSimpleName())
                 .build();
@@ -189,11 +225,8 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
         return MethodSpec.methodBuilder("download%s".formatted(capitalize(field.getSimpleName())))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
-                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH)
-                        .addMember(
-                                "value",
-                                "\"/%s/{binaryPropertyIndex}/download\"".formatted(uncapitalize(field.getSimpleName())))
-                        .build())
+                .addAnnotation(
+                        path("/%s/{binaryPropertyIndex}/download".formatted(uncapitalize(field.getSimpleName()))))
                 .addParameter(ParameterSpec.builder(Jakarta.RS_URIINFO, "uriInfo")
                         .addAnnotation(
                                 AnnotationSpec.builder(Jakarta.RS_CONTEXT).build())
@@ -207,16 +240,8 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
         return MethodSpec.methodBuilder("as%s".formatted(method.returnType()))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
-                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH)
-                        .addMember("value", "\"/as/%s\"".formatted(uncapitalize(method.returnType())))
-                        .build())
-                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PRODUCES)
-                        .addMember(
-                                "value",
-                                CodeBlock.builder()
-                                        .add("$T.APPLICATION_JSON", Jakarta.RS_MEDIATYPE)
-                                        .build())
-                        .build())
+                .addAnnotation(path("/as/%s".formatted(uncapitalize(method.returnType()))))
+                .addAnnotation(producesJson())
                 .addParameter(ParameterSpec.builder(Jakarta.RS_URIINFO, "uriInfo")
                         .addAnnotation(
                                 AnnotationSpec.builder(Jakarta.RS_CONTEXT).build())
