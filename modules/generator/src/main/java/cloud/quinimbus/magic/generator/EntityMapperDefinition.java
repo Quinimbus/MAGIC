@@ -5,5 +5,5 @@ import java.util.List;
 
 public record EntityMapperDefinition(TypeName type, String name, List<Method> methods) {
 
-    public static record Method(String returnType, String methodName, String mapperName) {}
+    public static record Method(TypeName returnTypeName, String returnType, String methodName, String mapperName) {}
 }

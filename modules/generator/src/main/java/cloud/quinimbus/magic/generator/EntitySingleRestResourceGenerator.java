@@ -40,8 +40,9 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
         var singleResourceTypeBuilder = classBuilder(name + "SingleResource")
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(superclass())
+                .addAnnotation(tagByType())
                 .addMethod(constructor())
-                .addMethod(createGetById(weak()))
+                .addMethod(createGetById())
                 .addMethod(createReplace())
                 .addMethod(createDeleteById());
         if (!weak()) {
@@ -164,84 +165,149 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .build();
     }
 
-    private MethodSpec createGetById(boolean uriInfoParameter) {
-        var method = MethodSpec.methodBuilder("getById")
+    private MethodSpec createGetById() {
+        var spec = MethodSpec.methodBuilder("getById")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
                 .addAnnotation(producesJson())
+                .addAnnotation(operation(
+                        "Get%sById".formatted(capitalize(Records.idFromType(recordElement))),
+                        "Get entry of type %s by id".formatted(name)))
+                .addAnnotation(idPathParameter())
+                .addAnnotation(response("200", objectSchema(entityTypeName())))
                 .addParameter(injectUriInfo())
                 .returns(Jakarta.RS_RESPONSE)
                 .addStatement("return super.getById(uriInfo)");
-        return method.build();
+        if (weak()) {
+            spec.addAnnotation(ownerIdPathParameter());
+        }
+        return spec.build();
     }
 
     private MethodSpec createReplace() {
-        return MethodSpec.methodBuilder("replace")
+        var spec = MethodSpec.methodBuilder("replace")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PUT).build())
                 .addAnnotation(consumesJson())
+                .addAnnotation(operation(
+                        "Put%sById".formatted(capitalize(Records.idFromType(recordElement))),
+                        "Replace entry of type %s by id".formatted(name)))
+                .addAnnotation(idPathParameter())
+                .addAnnotation(emptyResponse("202"))
                 .addParameter(ParameterSpec.builder(entityTypeName(), "entity").build())
                 .returns(Jakarta.RS_RESPONSE)
-                .addStatement("return super.replace(entity)")
-                .build();
+                .addStatement("return super.replace(entity)");
+        if (weak()) {
+            spec.addAnnotation(ownerIdPathParameter());
+        }
+        return spec.build();
     }
 
     private MethodSpec createReplaceByMultipart() {
-        return MethodSpec.methodBuilder("replaceByMultipart")
+        var spec = MethodSpec.methodBuilder("replaceByMultipart")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PUT).build())
                 .addAnnotation(consumesMultipart())
+                .addAnnotation(operation(
+                        "Put%sByIdByMP".formatted(capitalize(Records.idFromType(recordElement))),
+                        "Replace entry of type %s by id".formatted(name)))
+                .addAnnotation(idPathParameter())
+                .addAnnotation(emptyResponse("202"))
                 .addParameter(
                         ParameterSpec.builder(ParameterizedTypeName.get(Java.LIST, Jakarta.RS_ENTITY_PART), "parts")
+                                .addAnnotation(requestBody(
+                                        parametersSchema(parameter("entity", "The entity data as JSON object"))))
                                 .build())
                 .returns(Jakarta.RS_RESPONSE)
                 .addException(Java.IO_EXCEPTION)
-                .addStatement("return super.replaceByMultipart(parts)")
-                .build();
+                .addStatement("return super.replaceByMultipart(parts)");
+        if (weak()) {
+            spec.addAnnotation(ownerIdPathParameter());
+        }
+        return spec.build();
     }
 
     private MethodSpec createDeleteById() {
-        return MethodSpec.methodBuilder("deleteById")
+        var spec = MethodSpec.methodBuilder("deleteById")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_DELETE).build())
+                .addAnnotation(operation(
+                        "Delete%sById".formatted(capitalize(Records.idFromType(recordElement))),
+                        "Delete entry of type %s by id".formatted(name)))
+                .addAnnotation(idPathParameter())
+                .addAnnotation(emptyResponse("202"))
                 .addParameter(injectUriInfo())
                 .returns(Jakarta.RS_RESPONSE)
-                .addStatement("return super.deleteById(uriInfo)")
-                .build();
+                .addStatement("return super.deleteById(uriInfo)");
+       if (weak()) {
+            spec.addAnnotation(ownerIdPathParameter());
+        }
+        return spec.build();
     }
 
     private MethodSpec createBinaryDownload(MagicVariableElement field) {
-        return MethodSpec.methodBuilder("download%s".formatted(capitalize(field.getSimpleName())))
+        var spec = MethodSpec.methodBuilder("download%s".formatted(capitalize(field.getSimpleName())))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
                 .addAnnotation(path("/%s/download".formatted(uncapitalize(field.getSimpleName()))))
+                .addAnnotation(operation(
+                        "Download%sBinaryBy%s"
+                                .formatted(
+                                        capitalize(Records.idFromType(recordElement)),
+                                        capitalize(field.getSimpleName())),
+                        "Download binary in property %s of entry of type %s by id"
+                                .formatted(field.getSimpleName(), name)))
+                .addAnnotation(idPathParameter())
                 .addParameter(injectUriInfo())
                 .returns(Jakarta.RS_RESPONSE)
-                .addCode("return downloadBinary(uriInfo, $T::$L);", entityTypeName(), field.getSimpleName())
-                .build();
+                .addCode("return downloadBinary(uriInfo, $T::$L);", entityTypeName(), field.getSimpleName());
+        if (weak()) {
+            spec.addAnnotation(ownerIdPathParameter());
+        }
+        return spec.build();
     }
 
     private MethodSpec createListBinaryDownload(MagicVariableElement field) {
-        return MethodSpec.methodBuilder("download%s".formatted(capitalize(field.getSimpleName())))
+        var spec = MethodSpec.methodBuilder("download%s".formatted(capitalize(field.getSimpleName())))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
                 .addAnnotation(
                         path("/%s/{binaryPropertyIndex}/download".formatted(uncapitalize(field.getSimpleName()))))
+                .addAnnotation(operation(
+                        "Download%sBinaryBy%sAndIndex"
+                                .formatted(
+                                        capitalize(Records.idFromType(recordElement)),
+                                        capitalize(field.getSimpleName())),
+                        "Download binary in property %s of entry of type %s by id"
+                                .formatted(field.getSimpleName(), name)))
+                .addAnnotation(idPathParameter())
+                .addAnnotation(pathParameter("binaryPropertyIndex", "Index of the binary in the binary list"))
                 .addParameter(ParameterSpec.builder(Jakarta.RS_URIINFO, "uriInfo")
                         .addAnnotation(
                                 AnnotationSpec.builder(Jakarta.RS_CONTEXT).build())
                         .build())
                 .returns(Jakarta.RS_RESPONSE)
-                .addCode("return downloadBinaryFromList(uriInfo, $T::$L);", entityTypeName(), field.getSimpleName())
-                .build();
+                .addCode("return downloadBinaryFromList(uriInfo, $T::$L);", entityTypeName(), field.getSimpleName());
+        if (weak()) {
+            spec.addAnnotation(ownerIdPathParameter());
+        }
+        return spec.build();
     }
 
     private MethodSpec createMappedAsMethod(EntityMapperDefinition.Method method) {
-        return MethodSpec.methodBuilder("as%s".formatted(method.returnType()))
+        var spec = MethodSpec.methodBuilder("as%s".formatted(method.returnType()))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
                 .addAnnotation(path("/as/%s".formatted(uncapitalize(method.returnType()))))
                 .addAnnotation(producesJson())
+                .addAnnotation(operation(
+                        "Get%sAs%sById"
+                                .formatted(
+                                        capitalize(Records.idFromType(recordElement)),
+                                        capitalize(capitalize(method.returnType()))),
+                        "Get entry of type %s by id mapped as %s".formatted(name, capitalize(method.returnType()))))
+                .addAnnotation(idPathParameter())
+                .addAnnotation(response("200", objectSchema(method.returnTypeName())))
                 .addParameter(ParameterSpec.builder(Jakarta.RS_URIINFO, "uriInfo")
                         .addAnnotation(
                                 AnnotationSpec.builder(Jakarta.RS_CONTEXT).build())
@@ -250,7 +316,19 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .addCode(
                         "return getByIdMapped(uriInfo, $L::$L);",
                         uncapitalize(method.mapperName()),
-                        method.methodName())
-                .build();
+                        method.methodName());
+        if (weak()) {
+            spec.addAnnotation(ownerIdPathParameter());
+        }
+        return spec.build();
+    }
+
+    private AnnotationSpec idPathParameter() {
+        return pathParameter(name + "Id", "The id of the %s".formatted(name));
+    }
+
+    private AnnotationSpec ownerIdPathParameter() {
+        return pathParameter(
+                owningType.getSimpleName() + "Id", "The id of the owning %s".formatted(owningType.getSimpleName()));
     }
 }

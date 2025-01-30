@@ -1,8 +1,10 @@
 package cloud.quinimbus.magic.generator;
 
 import cloud.quinimbus.common.tools.IDs;
+import cloud.quinimbus.common.tools.Records;
 import cloud.quinimbus.magic.classnames.Jakarta;
 import cloud.quinimbus.magic.classnames.Java;
+import cloud.quinimbus.magic.classnames.Microprofile;
 import cloud.quinimbus.magic.classnames.QuiNimbusBinarystore;
 import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
@@ -14,6 +16,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
@@ -147,6 +150,98 @@ public class AbstractEntityRestResourceGenerator extends RecordEntityBasedGenera
     ParameterSpec injectUriInfo() {
         return ParameterSpec.builder(Jakarta.RS_URIINFO, "uriInfo")
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_CONTEXT).build())
+                .build();
+    }
+
+    AnnotationSpec tagByType() {
+        return AnnotationSpec.builder(Microprofile.OPENAPI_TAG)
+                .addMember("name", "$S", capitalize(IDs.toPlural(Records.idFromType(recordElement))))
+                .build();
+    }
+
+    AnnotationSpec operation(String operationId, String summary) {
+        return AnnotationSpec.builder(Microprofile.OPENAPI_OPERATION)
+                .addMember("operationId", "$S", operationId)
+                .addMember("summary", "$S", summary)
+                .build();
+    }
+
+    AnnotationSpec emptyResponse(String responseCode) {
+        return AnnotationSpec.builder(Microprofile.OPENAPI_API_RESPONSE)
+                .addMember("responseCode", "$S", responseCode)
+                .build();
+    }
+
+    AnnotationSpec response(String responseCode, AnnotationSpec schema) {
+        return AnnotationSpec.builder(Microprofile.OPENAPI_API_RESPONSE)
+                .addMember("responseCode", "$S", responseCode)
+                .addMember(
+                        "content",
+                        "$L",
+                        AnnotationSpec.builder(Microprofile.OPENAPI_CONTENT)
+                                .addMember("schema", "$L", schema)
+                                .build())
+                .build();
+    }
+
+    AnnotationSpec arraySchema(TypeName type) {
+        return AnnotationSpec.builder(Microprofile.OPENAPI_SCHEMA)
+                .addMember("implementation", "$T.class", type)
+                .addMember("type", "$T.ARRAY", Microprofile.OPENAPI_SCHEMA_TYPE)
+                .build();
+    }
+
+    AnnotationSpec objectSchema(TypeName type) {
+        return AnnotationSpec.builder(Microprofile.OPENAPI_SCHEMA)
+                .addMember("implementation", "$T.class", type)
+                .addMember("type", "$T.OBJECT", Microprofile.OPENAPI_SCHEMA_TYPE)
+                .build();
+    }
+
+    AnnotationSpec stringSchema() {
+        return AnnotationSpec.builder(Microprofile.OPENAPI_SCHEMA)
+                .addMember("type", "$T.STRING", Microprofile.OPENAPI_SCHEMA_TYPE)
+                .build();
+    }
+
+    AnnotationSpec requestBody(AnnotationSpec schema) {
+        return AnnotationSpec.builder(Microprofile.OPENAPI_REQUEST_BODY)
+                .addMember(
+                        "content",
+                        "$L",
+                        AnnotationSpec.builder(Microprofile.OPENAPI_CONTENT)
+                                .addMember("schema", "$L", schema)
+                                .build())
+                .build();
+    }
+
+    AnnotationSpec parametersSchema(AnnotationSpec... parameters) {
+        var anno = AnnotationSpec.builder(Microprofile.OPENAPI_SCHEMA)
+                .addMember("type", "$T.OBJECT", Microprofile.OPENAPI_SCHEMA_TYPE);
+        for (AnnotationSpec parameter : parameters) {
+            anno.addMember("properties", "$L", parameter);
+        }
+        return anno.build();
+    }
+
+    AnnotationSpec parameter(String name, String title) {
+        return AnnotationSpec.builder(Microprofile.OPENAPI_SCHEMA_PROPERTY)
+                .addMember("name", "$S", name)
+                .addMember("title", "$S", title)
+                .build();
+    }
+
+    AnnotationSpec pathParameter(String name, String description) {
+        return AnnotationSpec.builder(Microprofile.OPENAPI_PARAMETER)
+                .addMember("name", "$S", name)
+                .addMember("description", "$S", description)
+                .addMember("in", "$T.PATH", Microprofile.OPENAPI_PARAMETER_IN)
+                .addMember(
+                        "content",
+                        "$L",
+                        AnnotationSpec.builder(Microprofile.OPENAPI_CONTENT)
+                                .addMember("schema", "$L", stringSchema())
+                                .build())
                 .build();
     }
 }

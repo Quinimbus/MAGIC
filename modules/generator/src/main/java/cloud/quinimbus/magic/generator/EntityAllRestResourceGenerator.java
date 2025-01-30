@@ -43,6 +43,7 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
         var allResourceTypeBuilder = classBuilder(name + "AllResource")
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(superclass())
+                .addAnnotation(tagByType())
                 .addField(FieldSpec.builder(repository(), "repository", Modifier.PRIVATE, Modifier.FINAL)
                         .build())
                 .addMethod(constructor())
@@ -134,69 +135,105 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
     }
 
     private MethodSpec createGetAll(boolean uriInfoParameter) {
-        var method = MethodSpec.methodBuilder("getAll")
+        var spec = MethodSpec.methodBuilder("getAll")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
                 .addAnnotation(producesJson())
+                .addAnnotation(operation(
+                        "GetAll%s".formatted(capitalize(IDs.toPlural(Records.idFromType(recordElement)))),
+                        "Get all entries of type %s".formatted(name)))
+                .addAnnotation(response("200", arraySchema(entityTypeName())))
                 .returns(Jakarta.RS_RESPONSE);
         if (uriInfoParameter) {
-            method.addParameter(injectUriInfo()).addStatement("return super.getAll(uriInfo)");
+            spec.addParameter(injectUriInfo()).addStatement("return super.getAll(uriInfo)");
         } else {
-            method.addStatement("return super.getAll()");
+            spec.addStatement("return super.getAll()");
         }
-        return method.build();
+        if (weak()) {
+            spec.addAnnotation(ownerIdPathParameter());
+        }
+        return spec.build();
     }
 
     private MethodSpec createGetAllIDs(boolean uriInfoParameter) {
-        var method = MethodSpec.methodBuilder("getAllIDs")
+        var spec = MethodSpec.methodBuilder("getAllIDs")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
                 .addAnnotation(path("/as/ids"))
                 .addAnnotation(producesJson())
+                .addAnnotation(operation(
+                        "GetAll%sIDs".formatted(capitalize(Records.idFromType(recordElement))),
+                        "Get ids of all entries of type %s".formatted(name)))
+                .addAnnotation(response("200", arraySchema(idTypeName())))
                 .returns(Jakarta.RS_RESPONSE);
         if (uriInfoParameter) {
-            method.addParameter(injectUriInfo()).addStatement("return super.getAllIDs(uriInfo)");
+            spec.addParameter(injectUriInfo()).addStatement("return super.getAllIDs(uriInfo)");
         } else {
-            method.addStatement("return super.getAllIDs()");
+            spec.addStatement("return super.getAllIDs()");
         }
-        return method.build();
+        if (weak()) {
+            spec.addAnnotation(ownerIdPathParameter());
+        }
+        return spec.build();
     }
 
     private MethodSpec createPostNew(boolean uriInfoParameter) {
-        var method = MethodSpec.methodBuilder("postNew")
+        var spec = MethodSpec.methodBuilder("postNew")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_POST).build())
                 .addAnnotation(consumesJson())
+                .addAnnotation(operation(
+                        "PostNew%s".formatted(capitalize(IDs.toPlural(Records.idFromType(recordElement)))),
+                        "Create a new entry of type %s".formatted(name)))
+                .addAnnotation(emptyResponse("202"))
                 .addParameter(ParameterSpec.builder(entityTypeName(), "entity").build())
                 .returns(Jakarta.RS_RESPONSE);
         if (uriInfoParameter) {
-            method.addParameter(injectUriInfo()).addStatement("return super.postNew(uriInfo, entity)");
+            spec.addParameter(injectUriInfo()).addStatement("return super.postNew(uriInfo, entity)");
         } else {
-            method.addStatement("return super.postNew(entity)");
+            spec.addStatement("return super.postNew(entity)");
         }
-        return method.build();
+        if (weak()) {
+            spec.addAnnotation(ownerIdPathParameter());
+        }
+        return spec.build();
     }
 
     private MethodSpec createPostNewByMultipart() {
-        return MethodSpec.methodBuilder("postNewByMultipart")
+        var spec = MethodSpec.methodBuilder("postNewByMultipart")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_POST).build())
                 .addAnnotation(consumesMultipart())
+                .addAnnotation(operation(
+                        "PostNew%sByMP".formatted(capitalize(IDs.toPlural(Records.idFromType(recordElement)))),
+                        "Create a new entry of type %s".formatted(name)))
                 .addParameter(
                         ParameterSpec.builder(ParameterizedTypeName.get(Java.LIST, Jakarta.RS_ENTITY_PART), "parts")
+                                .addAnnotation(requestBody(
+                                        parametersSchema(parameter("entity", "The entity data as JSON object"))))
                                 .build())
                 .returns(Jakarta.RS_RESPONSE)
                 .addException(Java.IO_EXCEPTION)
-                .addStatement("return super.postNewByMultipart(parts)")
-                .build();
+                .addStatement("return super.postNewByMultipart(parts)");
+        if (weak()) {
+            spec.addAnnotation(ownerIdPathParameter());
+        }
+        return spec.build();
     }
 
     private MethodSpec createByPropertyEndpoint(MagicVariableElement ve) {
-        var method = MethodSpec.methodBuilder("by%s".formatted(capitalize(ve.getSimpleName())))
+        var spec = MethodSpec.methodBuilder("by%s".formatted(capitalize(ve.getSimpleName())))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
                 .addAnnotation(path("/by/%s/{%s}".formatted(ve.getSimpleName(), ve.getSimpleName())))
                 .addAnnotation(producesJson())
+                .addAnnotation(operation(
+                        "Get%sBy%s"
+                                .formatted(
+                                        capitalize(IDs.toPlural(Records.idFromType(recordElement))),
+                                        capitalize(ve.getSimpleName())),
+                        "Get all entries of type %s filtered by property %s".formatted(name, ve.getSimpleName())))
+                .addAnnotation(response("200", arraySchema(entityTypeName())))
                 .addParameter(
                         ParameterSpec.builder(ClassName.get(ve.getElement().asType()), ve.getSimpleName())
                                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PATH_PARAM)
@@ -206,9 +243,10 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                 .returns(Jakarta.RS_RESPONSE);
         String code;
         if (weak()) {
-            method.addParameter(ParameterSpec.builder(Jakarta.RS_URIINFO, "uriInfo")
+            spec.addParameter(ParameterSpec.builder(Jakarta.RS_URIINFO, "uriInfo")
                     .addAnnotation(AnnotationSpec.builder(Jakarta.RS_CONTEXT).build())
                     .build());
+            spec.addAnnotation(ownerIdPathParameter());
             code =
                     """
                     return this.getByProperty(uriInfo, %s, this.repository::findAllBy%s);
@@ -221,34 +259,59 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                     """
                             .formatted(ve.getSimpleName(), capitalize(ve.getSimpleName()));
         }
-        method.addCode(code);
-        return method.build();
+        spec.addCode(code);
+        return spec.build();
     }
 
     private MethodSpec createMappedAsMethod(EntityMapperDefinition.Method method) {
-        return MethodSpec.methodBuilder("as%s".formatted(method.returnType()))
+        var spec = MethodSpec.methodBuilder("as%s".formatted(method.returnType()))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
                 .addAnnotation(path("/as/%s".formatted(uncapitalize(method.returnType()))))
                 .addAnnotation(producesJson())
+                .addAnnotation(operation(
+                        "Get%sAs%s"
+                                .formatted(
+                                        capitalize(IDs.toPlural(Records.idFromType(recordElement))),
+                                        capitalize(capitalize(method.returnType()))),
+                        "Get all entries of type %s mapped as %s".formatted(name, capitalize(method.returnType()))))
+                .addAnnotation(response("200", arraySchema(method.returnTypeName())))
                 .addParameter(ParameterSpec.builder(Jakarta.RS_URIINFO, "uriInfo")
                         .addAnnotation(
                                 AnnotationSpec.builder(Jakarta.RS_CONTEXT).build())
                         .build())
                 .returns(Jakarta.RS_RESPONSE)
-                .addCode("return getAllMapped($L::$L);", uncapitalize(method.mapperName()), method.methodName())
-                .build();
+                .addCode("return getAllMapped($L::$L);", uncapitalize(method.mapperName()), method.methodName());
+        if (weak()) {
+            spec.addAnnotation(ownerIdPathParameter());
+        }
+        return spec.build();
     }
 
     private MethodSpec createActionMethod(RecordContextActionDefinition definition) {
-        return MethodSpec.methodBuilder("callAction%s".formatted(capitalize(definition.name())))
+        var spec = MethodSpec.methodBuilder("callAction%s".formatted(capitalize(definition.name())))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_POST).build())
                 .addAnnotation(path("/action/%s".formatted(uncapitalize(definition.name()))))
+                .addAnnotation(operation(
+                        "Call%sAction%s"
+                                .formatted(
+                                        capitalize(IDs.toPlural(Records.idFromType(recordElement))),
+                                        capitalize(definition.name())),
+                        "Call the global type action %s of type %s".formatted(definition.name(), name)))
+                .addAnnotation(emptyResponse("204"))
                 .addCode(
                         "this.$L.$L();",
                         uncapitalize(definition.type().simpleName()),
-                        definition.method().name())
-                .build();
+                        definition.method().name());
+        if (weak()) {
+            spec.addAnnotation(ownerIdPathParameter());
+        }
+        return spec.build();
+    }
+
+    private AnnotationSpec ownerIdPathParameter() {
+        return pathParameter(
+                owningType.getSimpleName() + "Id", "The id of the owning %s".formatted(owningType.getSimpleName()));
     }
 }

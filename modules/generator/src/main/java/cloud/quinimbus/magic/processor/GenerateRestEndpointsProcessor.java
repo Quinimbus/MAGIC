@@ -117,6 +117,7 @@ public class GenerateRestEndpointsProcessor extends MagicClassProcessor {
                                 .getType()
                                 .equals(recordElement.getType()))
                         .map(e -> new EntityMapperDefinition.Method(
+                                e.returnType().getClassName(),
                                 e.returnType().getSimpleName(),
                                 e.getSimpleName(),
                                 e.enclosingElement().getSimpleName()))
@@ -131,7 +132,10 @@ public class GenerateRestEndpointsProcessor extends MagicClassProcessor {
                         .filter(m -> m.parameters.size() == 1)
                         .filter(m -> m.parameters.get(0).type.equals(recordElement.getType()))
                         .map(ms -> new EntityMapperDefinition.Method(
-                                ((ClassName) ms.returnType).simpleName(), ms.name, spec.getTypeSpec().name))
+                                ms.returnType,
+                                ((ClassName) ms.returnType).simpleName(),
+                                ms.name,
+                                spec.getTypeSpec().name))
                         .toList());
     }
 }
