@@ -4,6 +4,7 @@ import cloud.quinimbus.common.tools.IDs;
 import cloud.quinimbus.common.tools.Records;
 import cloud.quinimbus.magic.classnames.Jakarta;
 import cloud.quinimbus.magic.classnames.Java;
+import cloud.quinimbus.magic.classnames.Quarkus;
 import cloud.quinimbus.magic.classnames.QuiNimbusBinarystore;
 import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
@@ -27,13 +28,17 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
 
     private final List<EntityMapperDefinition> entityMappers;
 
+    private final boolean quarkusRestReactiveWorkaround;
+
     public EntitySingleRestResourceGenerator(
             MagicClassElement recordElement,
             List<MagicClassElement> entityChildren,
-            List<EntityMapperDefinition> entityMappers) {
+            List<EntityMapperDefinition> entityMappers,
+            boolean quarkusRestReactiveWorkaround) {
         super(recordElement);
         this.entityChildren = entityChildren != null ? entityChildren : List.of();
         this.entityMappers = entityMappers != null ? entityMappers : List.of();
+        this.quarkusRestReactiveWorkaround = quarkusRestReactiveWorkaround;
     }
 
     public MagicTypeSpec generateSingleResource() {
@@ -204,7 +209,15 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
     }
 
     private MethodSpec createReplaceByMultipart() {
-        var spec = MethodSpec.methodBuilder("replaceByMultipart")
+        var parameterSpec = ParameterSpec.builder(
+                        Java.listOf(quarkusRestReactiveWorkaround ? Quarkus.FILE_UPLOAD : Jakarta.RS_ENTITY_PART),
+                        "parts")
+                .addAnnotation(requestBody(parametersSchema(parameter("entity", "The entity data as JSON object"))));
+        if (quarkusRestReactiveWorkaround) {
+            parameterSpec.addAnnotation(restFormAll());
+        }
+        var spec = MethodSpec.methodBuilder(
+                        quarkusRestReactiveWorkaround ? "replaceByMultipartWorkaround" : "replaceByMultipart")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PUT).build())
                 .addAnnotation(consumesMultipart())
@@ -213,14 +226,17 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                         "Replace entry of type %s by id".formatted(name)))
                 .addAnnotation(idPathParameter())
                 .addAnnotation(emptyResponse("202"))
-                .addParameter(
-                        ParameterSpec.builder(ParameterizedTypeName.get(Java.LIST, Jakarta.RS_ENTITY_PART), "parts")
-                                .addAnnotation(requestBody(
-                                        parametersSchema(parameter("entity", "The entity data as JSON object"))))
-                                .build())
+                .addParameter(parameterSpec.build())
                 .returns(Jakarta.RS_RESPONSE)
-                .addException(Java.IO_EXCEPTION)
-                .addStatement("return super.replaceByMultipart(parts)");
+                .addException(Java.IO_EXCEPTION);
+        if (quarkusRestReactiveWorkaround) {
+            spec.addParameter(injectReactiveRequestContext());
+            spec.addStatement(
+                    "return super.replaceByMultipart($T.convert(parts, context))",
+                    QuiNimbusRest.QUARKUS_MULTIPART_SUPPORT);
+        } else {
+            spec.addStatement("return super.replaceByMultipart(parts)");
+        }
         if (weak()) {
             spec.addAnnotation(ownerIdPathParameter());
         }

@@ -5,6 +5,7 @@ import cloud.quinimbus.common.tools.Records;
 import cloud.quinimbus.magic.classnames.Jakarta;
 import cloud.quinimbus.magic.classnames.Java;
 import cloud.quinimbus.magic.classnames.Microprofile;
+import cloud.quinimbus.magic.classnames.Quarkus;
 import cloud.quinimbus.magic.classnames.QuiNimbusBinarystore;
 import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
@@ -153,6 +154,12 @@ public class AbstractEntityRestResourceGenerator extends RecordEntityBasedGenera
                 .build();
     }
 
+    ParameterSpec injectReactiveRequestContext() {
+        return ParameterSpec.builder(Quarkus.RESTEASY_REACTIVE_REQUEST_CONTEXT, "context")
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_CONTEXT).build())
+                .build();
+    }
+
     AnnotationSpec tagByType() {
         return AnnotationSpec.builder(Microprofile.OPENAPI_TAG)
                 .addMember("name", "$S", capitalize(IDs.toPlural(Records.idFromType(recordElement))))
@@ -242,6 +249,12 @@ public class AbstractEntityRestResourceGenerator extends RecordEntityBasedGenera
                         AnnotationSpec.builder(Microprofile.OPENAPI_CONTENT)
                                 .addMember("schema", "$L", stringSchema())
                                 .build())
+                .build();
+    }
+
+    AnnotationSpec restFormAll() {
+        return AnnotationSpec.builder(Quarkus.REST_FORM)
+                .addMember("value", "$T.ALL", Quarkus.FILE_UPLOAD)
                 .build();
     }
 }

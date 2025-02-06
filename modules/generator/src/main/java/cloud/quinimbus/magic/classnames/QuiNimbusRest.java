@@ -19,4 +19,7 @@ public class QuiNimbusRest {
     public static final ClassName MESSAGES = ClassName.get("cloud.quinimbus.rest.crud", "Messages");
 
     public static final ClassName ID_AND_LABEL_RECORD = ClassName.get("cloud.quinimbus.rest.crud.common", "IdAndLabel");
+
+    public static final ClassName QUARKUS_MULTIPART_SUPPORT =
+            ClassName.get("cloud.quinimbus.rest.quarkus", "ResteasyReactiveMultipartSupport");
 }

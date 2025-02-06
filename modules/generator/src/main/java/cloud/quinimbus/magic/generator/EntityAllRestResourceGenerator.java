@@ -4,6 +4,7 @@ import cloud.quinimbus.common.tools.IDs;
 import cloud.quinimbus.common.tools.Records;
 import cloud.quinimbus.magic.classnames.Jakarta;
 import cloud.quinimbus.magic.classnames.Java;
+import cloud.quinimbus.magic.classnames.Quarkus;
 import cloud.quinimbus.magic.classnames.QuiNimbusBinarystore;
 import cloud.quinimbus.magic.classnames.QuiNimbusCommon;
 import cloud.quinimbus.magic.classnames.QuiNimbusRest;
@@ -29,14 +30,18 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
 
     private final Set<RecordContextActionDefinition> recordContextActionDefinitions;
 
+    private final boolean quarkusRestReactiveWorkaround;
+
     public EntityAllRestResourceGenerator(
             MagicClassElement recordElement,
             List<EntityMapperDefinition> entityMappers,
-            Set<RecordContextActionDefinition> recordContextActionDefinitions) {
+            Set<RecordContextActionDefinition> recordContextActionDefinitions,
+            boolean quarkusRestReactiveWorkaround) {
         super(recordElement);
         this.entityMappers = entityMappers != null ? entityMappers : List.of();
         this.recordContextActionDefinitions =
                 recordContextActionDefinitions != null ? recordContextActionDefinitions : Set.of();
+        this.quarkusRestReactiveWorkaround = quarkusRestReactiveWorkaround;
     }
 
     public MagicTypeSpec generateAllResource() {
@@ -200,21 +205,32 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
     }
 
     private MethodSpec createPostNewByMultipart() {
-        var spec = MethodSpec.methodBuilder("postNewByMultipart")
+        var parameterSpec = ParameterSpec.builder(
+                        Java.listOf(quarkusRestReactiveWorkaround ? Quarkus.FILE_UPLOAD : Jakarta.RS_ENTITY_PART),
+                        "parts")
+                .addAnnotation(requestBody(parametersSchema(parameter("entity", "The entity data as JSON object"))));
+        if (quarkusRestReactiveWorkaround) {
+            parameterSpec.addAnnotation(restFormAll());
+        }
+        var spec = MethodSpec.methodBuilder(
+                        quarkusRestReactiveWorkaround ? "postNewByMultipartWorkaround" : "postNewByMultipart")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_POST).build())
                 .addAnnotation(consumesMultipart())
                 .addAnnotation(operation(
                         "PostNew%sByMP".formatted(capitalize(IDs.toPlural(Records.idFromType(recordElement)))),
                         "Create a new entry of type %s".formatted(name)))
-                .addParameter(
-                        ParameterSpec.builder(ParameterizedTypeName.get(Java.LIST, Jakarta.RS_ENTITY_PART), "parts")
-                                .addAnnotation(requestBody(
-                                        parametersSchema(parameter("entity", "The entity data as JSON object"))))
-                                .build())
+                .addParameter(parameterSpec.build())
                 .returns(Jakarta.RS_RESPONSE)
-                .addException(Java.IO_EXCEPTION)
-                .addStatement("return super.postNewByMultipart(parts)");
+                .addException(Java.IO_EXCEPTION);
+        if (quarkusRestReactiveWorkaround) {
+            spec.addParameter(injectReactiveRequestContext());
+            spec.addStatement(
+                    "return super.postNewByMultipart($T.convert(parts, context))",
+                    QuiNimbusRest.QUARKUS_MULTIPART_SUPPORT);
+        } else {
+            spec.addStatement("return super.postNewByMultipart(parts)");
+        }
         if (weak()) {
             spec.addAnnotation(ownerIdPathParameter());
         }

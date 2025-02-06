@@ -39,8 +39,13 @@ public class GenerateRestEndpointsProcessor extends MagicClassProcessor {
 
     private Map<MagicClassElement, Set<RecordContextActionDefinition>> recordContextActions = new LinkedHashMap<>();
 
+    private boolean quarkusRestReactiveWorkaround;
+
     @Override
-    public void setup(RoundEnvironment re) {}
+    public void setup(RoundEnvironment re) {
+        quarkusRestReactiveWorkaround = Boolean.parseBoolean(
+                processingEnv.getOptions().getOrDefault("magic.quarkus.rest.reactive.workaround", "false"));
+    }
 
     @Override
     public void beforeProcessAll(
@@ -77,10 +82,16 @@ public class GenerateRestEndpointsProcessor extends MagicClassProcessor {
                             .add(toMapperDefinition(spec, element));
                 }));
                 var singleGen = new EntitySingleRestResourceGenerator(
-                        element, entityChildren.get(element), entityMappers.get(element));
+                        element,
+                        entityChildren.get(element),
+                        entityMappers.get(element),
+                        quarkusRestReactiveWorkaround);
                 this.writeTypeFile(singleGen.generateSingleResource());
                 var allGen = new EntityAllRestResourceGenerator(
-                        element, entityMappers.get(element), recordContextActions.get(element));
+                        element,
+                        entityMappers.get(element),
+                        recordContextActions.get(element),
+                        quarkusRestReactiveWorkaround);
                 this.writeTypeFile(allGen.generateAllResource());
             } catch (IOException ex) {
                 throw new IllegalStateException(ex);

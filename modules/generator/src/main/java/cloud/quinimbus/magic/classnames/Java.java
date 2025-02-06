@@ -1,6 +1,8 @@
 package cloud.quinimbus.magic.classnames;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 
 public class Java {
 
@@ -19,4 +21,8 @@ public class Java {
     public static final ClassName STRING = ClassName.get("java.lang", "String");
 
     public static final ClassName SUPPLIER = ClassName.get("java.util.function", "Supplier");
+
+    public static ParameterizedTypeName listOf(TypeName type) {
+        return ParameterizedTypeName.get(LIST, type);
+    }
 }
