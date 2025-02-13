@@ -144,6 +144,7 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
                 .addAnnotation(producesJson())
+                .addAnnotation(secureCRUDEndpoint(CRUDType.READ))
                 .addAnnotation(operation(
                         "GetAll%s".formatted(capitalize(IDs.toPlural(Records.idFromType(recordElement)))),
                         "Get all entries of type %s".formatted(name)))
@@ -166,6 +167,7 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
                 .addAnnotation(path("/as/ids"))
                 .addAnnotation(producesJson())
+                .addAnnotation(secureCRUDEndpoint(CRUDType.READ))
                 .addAnnotation(operation(
                         "GetAll%sIDs".formatted(capitalize(Records.idFromType(recordElement))),
                         "Get ids of all entries of type %s".formatted(name)))
@@ -187,6 +189,7 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_POST).build())
                 .addAnnotation(consumesJson())
+                .addAnnotation(secureCRUDEndpoint(CRUDType.CREATE))
                 .addAnnotation(operation(
                         "PostNew%s".formatted(capitalize(IDs.toPlural(Records.idFromType(recordElement)))),
                         "Create a new entry of type %s".formatted(name)))
@@ -217,6 +220,7 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_POST).build())
                 .addAnnotation(consumesMultipart())
+                .addAnnotation(secureCRUDEndpoint(CRUDType.CREATE))
                 .addAnnotation(operation(
                         "PostNew%sByMP".formatted(capitalize(IDs.toPlural(Records.idFromType(recordElement)))),
                         "Create a new entry of type %s".formatted(name)))
@@ -243,6 +247,7 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
                 .addAnnotation(path("/by/%s/{%s}".formatted(ve.getSimpleName(), ve.getSimpleName())))
                 .addAnnotation(producesJson())
+                .addAnnotation(secureCRUDEndpoint(CRUDType.READ))
                 .addAnnotation(operation(
                         "Get%sBy%s"
                                 .formatted(
@@ -285,6 +290,7 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
                 .addAnnotation(path("/as/%s".formatted(uncapitalize(method.returnType()))))
                 .addAnnotation(producesJson())
+                .addAnnotation(secureCRUDEndpoint(CRUDType.READ))
                 .addAnnotation(operation(
                         "Get%sAs%s"
                                 .formatted(
@@ -309,6 +315,7 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_POST).build())
                 .addAnnotation(path("/action/%s".formatted(uncapitalize(definition.name()))))
+                .addAnnotation(secureActionEndpoint(definition.method().element(), ActionType.CALL))
                 .addAnnotation(operation(
                         "Call%sAction%s"
                                 .formatted(

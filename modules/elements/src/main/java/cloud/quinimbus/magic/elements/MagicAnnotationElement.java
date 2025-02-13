@@ -1,9 +1,12 @@
 package cloud.quinimbus.magic.elements;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -46,16 +49,22 @@ public class MagicAnnotationElement {
         return this.elementUtils.getElementValuesWithDefaults(this.annotationMirror).entrySet().stream()
                 .filter(e -> e.getKey().getSimpleName().toString().equals(elementName))
                 .map(Map.Entry::getValue)
-                .map(e -> {
-                    if (e.getValue() instanceof DeclaredType type) {
-                        return (T) new MagicClassElement(
-                                (TypeElement) type.asElement(), this.elementUtils, this.typeUtils);
-                    }
-                    if (e.getValue() instanceof AnnotationMirror mirror) {
-                        return (T) new MagicAnnotationElement(mirror, this.elementUtils, this.typeUtils);
-                    }
-                    return (T) e.getValue();
-                })
+                .map(e -> (T)
+                        switch (e.getValue()) {
+                            case DeclaredType type -> new MagicClassElement(
+                                    (TypeElement) type.asElement(), this.elementUtils, this.typeUtils);
+                            case AnnotationMirror mirror -> new MagicAnnotationElement(
+                                    mirror, this.elementUtils, this.typeUtils);
+                            case VariableElement variableElement -> new MagicVariableElement(
+                                    variableElement, this.elementUtils, this.typeUtils);
+                            case List<?> list -> list.stream()
+                                    .map(le -> switch (le) {
+                                        case AnnotationValue av -> av.getValue();
+                                        default -> le;
+                                    })
+                                    .toList();
+                            default -> e.getValue();
+                        })
                 .findFirst();
     }
 }

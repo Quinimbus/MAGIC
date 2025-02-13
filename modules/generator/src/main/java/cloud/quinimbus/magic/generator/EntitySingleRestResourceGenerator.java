@@ -175,6 +175,7 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
                 .addAnnotation(producesJson())
+                .addAnnotation(secureCRUDEndpoint(CRUDType.READ))
                 .addAnnotation(operation(
                         "Get%sById".formatted(capitalize(Records.idFromType(recordElement))),
                         "Get entry of type %s by id".formatted(name)))
@@ -194,6 +195,7 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PUT).build())
                 .addAnnotation(consumesJson())
+                .addAnnotation(secureCRUDEndpoint(CRUDType.UPDATE))
                 .addAnnotation(operation(
                         "Put%sById".formatted(capitalize(Records.idFromType(recordElement))),
                         "Replace entry of type %s by id".formatted(name)))
@@ -221,6 +223,7 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_PUT).build())
                 .addAnnotation(consumesMultipart())
+                .addAnnotation(secureCRUDEndpoint(CRUDType.UPDATE))
                 .addAnnotation(operation(
                         "Put%sByIdByMP".formatted(capitalize(Records.idFromType(recordElement))),
                         "Replace entry of type %s by id".formatted(name)))
@@ -247,6 +250,7 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
         var spec = MethodSpec.methodBuilder("deleteById")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_DELETE).build())
+                .addAnnotation(secureCRUDEndpoint(CRUDType.DELETE))
                 .addAnnotation(operation(
                         "Delete%sById".formatted(capitalize(Records.idFromType(recordElement))),
                         "Delete entry of type %s by id".formatted(name)))
@@ -266,6 +270,7 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
                 .addAnnotation(path("/%s/download".formatted(uncapitalize(field.getSimpleName()))))
+                .addAnnotation(secureCRUDEndpoint(CRUDType.READ))
                 .addAnnotation(operation(
                         "Download%sBinaryBy%s"
                                 .formatted(
@@ -289,6 +294,7 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
                 .addAnnotation(
                         path("/%s/{binaryPropertyIndex}/download".formatted(uncapitalize(field.getSimpleName()))))
+                .addAnnotation(secureCRUDEndpoint(CRUDType.READ))
                 .addAnnotation(operation(
                         "Download%sBinaryBy%sAndIndex"
                                 .formatted(
@@ -316,6 +322,7 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .addAnnotation(AnnotationSpec.builder(Jakarta.RS_GET).build())
                 .addAnnotation(path("/as/%s".formatted(uncapitalize(method.returnType()))))
                 .addAnnotation(producesJson())
+                .addAnnotation(secureCRUDEndpoint(CRUDType.READ))
                 .addAnnotation(operation(
                         "Get%sAs%sById"
                                 .formatted(

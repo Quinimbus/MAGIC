@@ -40,4 +40,8 @@ public class Jakarta {
 
     public static final ClassName RS_WEBAPPLICATIONEXCEPTION =
             ClassName.get("jakarta.ws.rs", "WebApplicationException");
+
+    public static final ClassName SEC_PERMIT_ALL = ClassName.get("jakarta.annotation.security", "PermitAll");
+
+    public static final ClassName SEC_ROLES_ALLOWED = ClassName.get("jakarta.annotation.security", "RolesAllowed");
 }

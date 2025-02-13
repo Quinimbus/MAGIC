@@ -7,8 +7,11 @@ import cloud.quinimbus.magic.classnames.Java;
 import cloud.quinimbus.magic.classnames.Microprofile;
 import cloud.quinimbus.magic.classnames.Quarkus;
 import cloud.quinimbus.magic.classnames.QuiNimbusBinarystore;
+import cloud.quinimbus.magic.classnames.QuiNimbusCommon;
 import cloud.quinimbus.magic.classnames.QuiNimbusRest;
+import cloud.quinimbus.magic.elements.MagicAnnotationElement;
 import cloud.quinimbus.magic.elements.MagicClassElement;
+import cloud.quinimbus.magic.elements.MagicExecutableElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
 import static cloud.quinimbus.magic.util.Strings.capitalize;
 import com.squareup.javapoet.AnnotationSpec;
@@ -18,6 +21,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
@@ -256,5 +260,67 @@ public class AbstractEntityRestResourceGenerator extends RecordEntityBasedGenera
         return AnnotationSpec.builder(Quarkus.REST_FORM)
                 .addMember("value", "$T.ALL", Quarkus.FILE_UPLOAD)
                 .build();
+    }
+
+    public enum CRUDType {
+        CREATE("create"),
+        READ("read"),
+        UPDATE("update"),
+        DELETE("delete");
+
+        private final String annotationElement;
+
+        private CRUDType(String annotationElement) {
+            this.annotationElement = annotationElement;
+        }
+    }
+
+    public enum ActionType {
+        CALL("call");
+
+        private final String annotationElement;
+
+        private ActionType(String annotationElement) {
+            this.annotationElement = annotationElement;
+        }
+    }
+
+    AnnotationSpec secureCRUDEndpoint(CRUDType type) {
+        return this.recordElement
+                .findAnnotation(QuiNimbusCommon.CRUD_ROLES_ALLOWED_NAME)
+                .map(anno -> mapToSecAnnotation(type.annotationElement, anno))
+                .orElseGet(() -> AnnotationSpec.builder(Jakarta.SEC_PERMIT_ALL).build());
+    }
+
+    AnnotationSpec secureActionEndpoint(MagicExecutableElement method, ActionType type) {
+        return method.findAnnotation(QuiNimbusCommon.ACTION_ROLES_ALLOWED_NAME)
+                .map(anno -> mapToSecAnnotation(type.annotationElement, anno))
+                .orElseGet(() -> AnnotationSpec.builder(Jakarta.SEC_PERMIT_ALL).build());
+    }
+
+    private AnnotationSpec mapToSecAnnotation(String annotationElement, MagicAnnotationElement anno) {
+        var permissionAnno =
+                anno.<MagicAnnotationElement>getElementValue(annotationElement).orElseThrow();
+        var permissionType = permissionAnno
+                .<MagicVariableElement>getElementValue("value")
+                .map(MagicVariableElement::getSimpleName)
+                .orElseThrow();
+        return switch (permissionType) {
+            case "ANONYMOUS" -> AnnotationSpec.builder(Jakarta.SEC_PERMIT_ALL).build();
+            case "AUTHENTICATED" -> AnnotationSpec.builder(Jakarta.SEC_ROLES_ALLOWED)
+                    .addMember("value", "$S", "**")
+                    .build();
+            case "ROLES" -> {
+                var spec = AnnotationSpec.builder(Jakarta.SEC_ROLES_ALLOWED);
+                permissionAnno
+                        .<List<String>>getElementValue("roles")
+                        .orElseThrow()
+                        .forEach(r -> spec.addMember("value", "$S", r));
+                yield spec.build();
+            }
+            default -> throw new IllegalArgumentException(
+                    "Unknown permission type %s, did you mix different versions of Quinimbus dependencies?"
+                            .formatted(permissionType));
+        };
     }
 }

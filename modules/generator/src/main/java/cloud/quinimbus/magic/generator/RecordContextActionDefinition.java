@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public record RecordContextActionDefinition(ClassName type, String name, Method method) {
 
-    public static record Method(String name) {}
+    public static record Method(String name, MagicExecutableElement element) {}
 
     public static RecordContextActionDefinition fromExecutableElement(MagicExecutableElement method) {
         return new RecordContextActionDefinition(
@@ -18,7 +18,8 @@ public record RecordContextActionDefinition(ClassName type, String name, Method 
                 method.findAnnotation(QuiNimbusCommon.ACTION_NAME)
                         .flatMap(a -> a.getElementValue("value").map(String.class::cast))
                         .orElseThrow(),
-                new cloud.quinimbus.magic.generator.RecordContextActionDefinition.Method(method.getSimpleName()));
+                new cloud.quinimbus.magic.generator.RecordContextActionDefinition.Method(
+                        method.getSimpleName(), method));
     }
 
     public static Map<MagicClassElement, Set<RecordContextActionDefinition>> fromExecutableElements(Set<MagicExecutableElement> methods) {
