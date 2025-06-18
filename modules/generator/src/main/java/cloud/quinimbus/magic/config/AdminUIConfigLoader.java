@@ -26,7 +26,7 @@ public class AdminUIConfigLoader {
     public static AdminUIConfig.Field getFieldConfig(AdminUIConfig.Type typeConfig, String field) {
         return typeConfig
                 .fields()
-                .getOrDefault(field, new cloud.quinimbus.magic.config.AdminUIConfig.Field(capitalize(field)));
+                .getOrDefault(field, new cloud.quinimbus.magic.config.AdminUIConfig.Field(capitalize(field), null));
     }
 
     public static AdminUIConfig.GlobalAction getGlobalActionConfig(AdminUIConfig.Type typeConfig, String action) {

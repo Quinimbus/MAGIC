@@ -12,6 +12,7 @@ import cloud.quinimbus.magic.util.Strings;
 import static cloud.quinimbus.magic.util.Strings.*;
 import io.marioslab.basis.template.TemplateContext;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -91,8 +92,15 @@ public class TSContextGenerator {
                                 "%s%s"
                                         .formatted(
                                                 capitalize(name),
-                                                capitalize(e.typeElement().getSimpleName())),
-                                allowedValues(e)))
+                                                capitalize(
+                                                        e.typeElement().isEnum()
+                                                                ? e.typeElement()
+                                                                        .getSimpleName()
+                                                                : e.typeParameters()
+                                                                        .findAny()
+                                                                        .map(MagicClassElement::getSimpleName)
+                                                                        .orElse("<MissingTypeParameter>"))),
+                                allowedValues(e, AdminUIConfigLoader.getFieldConfig(typeConfig, e.getSimpleName()))))
                         .toList());
         context.set(
                 "hasBinaryField",
@@ -135,6 +143,7 @@ public class TSContextGenerator {
             case "java.lang.String", "java.time.LocalDateTime", "java.time.LocalDate" -> "string";
             case "java.lang.Boolean" -> "Boolean";
             case "java.util.List" -> "(%s)[]".formatted(toTSType(typeParameter[0], name));
+            case "java.util.Set" -> "(%s)[]".formatted(toTSType(typeParameter[0], name));
             case "cloud.quinimbus.binarystore.persistence.EmbeddableBinary" -> "EmbeddableBinary | File";
             default -> {
                 if (classElement.isEnum()) {
@@ -158,6 +167,7 @@ public class TSContextGenerator {
             case "java.time.LocalDateTime" -> "LOCALDATETIME";
             case "cloud.quinimbus.binarystore.persistence.EmbeddableBinary" -> "BINARY";
             case "java.util.List" -> "LIST_" + toFieldType(parameter, null);
+            case "java.util.Set" -> "SET_" + toFieldType(parameter, null);
             default -> {
                 if (type.isEnum()) {
                     yield "SELECTION";
@@ -167,11 +177,26 @@ public class TSContextGenerator {
         };
     }
 
-    private static List<TSAllowedValue> allowedValues(MagicVariableElement ve) {
+    private static List<TSAllowedValue> allowedValues(MagicVariableElement ve, AdminUIConfig.Field fieldConfig) {
         if (ve.typeElement().isEnum()) {
             return ve.typeElement()
                     .enumValues()
-                    .map(v -> new TSAllowedValue(v, v))
+                    .map(v -> new TSAllowedValue(
+                            v,
+                            Optional.ofNullable(fieldConfig.allowedValues().get(v))
+                                    .map(AdminUIConfig.AllowedValue::label)
+                                    .orElse(v)))
+                    .toList();
+        } else if (ve.typeParameters().findAny().map(MagicClassElement::isEnum).orElse(false)) {
+            return ve.typeParameters()
+                    .findAny()
+                    .orElseThrow()
+                    .enumValues()
+                    .map(v -> new TSAllowedValue(
+                            v,
+                            Optional.ofNullable(fieldConfig.allowedValues().get(v))
+                                    .map(AdminUIConfig.AllowedValue::label)
+                                    .orElse(v)))
                     .toList();
         }
         return List.of();
