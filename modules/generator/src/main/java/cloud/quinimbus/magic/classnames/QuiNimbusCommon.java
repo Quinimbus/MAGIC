@@ -21,8 +21,7 @@ public class QuiNimbusCommon {
     public static final String SEARCHABLE_ANNOTATION_NAME = "cloud.quinimbus.common.annotations.modelling.Searchable";
 
     public static final String ACTION_ROLES_ALLOWED_NAME =
-            "cloud.quinimbus.common.annotations.modelling.ActionRolesAllowed";
+            "cloud.quinimbus.common.annotations.security.ActionRolesAllowed";
 
-    public static final String CRUD_ROLES_ALLOWED_NAME =
-            "cloud.quinimbus.common.annotations.modelling.CRUDRolesAllowed";
+    public static final String CRUD_ROLES_ALLOWED_NAME = "cloud.quinimbus.common.annotations.security.CRUDRolesAllowed";
 }
