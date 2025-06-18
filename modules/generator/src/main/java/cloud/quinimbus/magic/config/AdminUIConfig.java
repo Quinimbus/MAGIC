@@ -95,7 +95,16 @@ public record AdminUIConfig(App app, Map<String, Type> types, Dependencies depen
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static record Field(String label) {}
+    public static record Field(String label, Map<String, AllowedValue> allowedValues) {
+        public Field {
+            if (allowedValues == null) {
+                allowedValues = Map.of();
+            }
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static record AllowedValue(String label) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static record GlobalAction(String label, String icon) {

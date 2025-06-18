@@ -4,7 +4,7 @@ import {{typeNameLCPlural}}View from '@/views/{{typeNameUCPlural}}ListView.vue'
 export class {{typeNameUC}} extends Entity<{{typeNameUC}}> {
     {{for field in fields}}
     {{field.nameLC}}?: {{field.type}}{{end}}
-}{{for field in fields}}{{if field.fieldType == "SELECTION"}}
+}{{for field in fields}}{{if field.fieldType == "SELECTION" || field.fieldType == "SET_SELECTION"}}
 
 export enum {{field.enumName}} {
     {{for allowedValue in field.allowedValues}}{{allowedValue.key}}, {{end}}
@@ -20,7 +20,7 @@ const {{typeNameLC}}Definition: TypeDefinition = {
             type: FieldType.{{field.fieldType}}{{if weak && field.owningField}},
             owningField: {{field.owningField}}{{end}}{{if field.hiddenInForm}},
             hiddenInForm: true{{end}}{{if field.references != null}},
-            references: "{{field.references}}"{{end}}{{if field.fieldType == "SELECTION"}},
+            references: "{{field.references}}"{{end}}{{if !field.allowedValues.isEmpty()}},
             allowedValues: [{{for allowedValue in field.allowedValues}}
                 {
                     label: "{{allowedValue.label}}",
