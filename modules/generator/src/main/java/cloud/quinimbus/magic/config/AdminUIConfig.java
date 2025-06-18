@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record AdminUIConfig(App app, Map<String, Type> types, Dependencies dependencies) {
+public record AdminUIConfig(App app, Map<String, Type> types, Dependencies dependencies, Oidc oidc) {
 
     public AdminUIConfig {
         if (app == null) {
@@ -15,6 +15,9 @@ public record AdminUIConfig(App app, Map<String, Type> types, Dependencies depen
         }
         if (dependencies == null) {
             dependencies = new Dependencies(null, null, null);
+        }
+        if (oidc == null) {
+            oidc = new Oidc(null, null);
         }
     }
 
@@ -55,6 +58,19 @@ public record AdminUIConfig(App app, Map<String, Type> types, Dependencies depen
             }
             if (title == null || title.isBlank()) {
                 title = name;
+            }
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static record Oidc(String authority, String clientId) {
+
+        public Oidc {
+            if (authority == null || authority.isBlank()) {
+                authority = "http://you-forgot-to-set-oidc-authority";
+            }
+            if (clientId == null || clientId.isBlank()) {
+                clientId = "you-forgot-to-set-oidc-clientId";
             }
         }
     }

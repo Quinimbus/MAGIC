@@ -44,7 +44,25 @@ const {{typeNameLC}}Definition: TypeDefinition = {
             label: "{{action.label}}",
             icon: "{{action.icon}}"
         },{{end}}
-    ]
+    ],
+    requiredRoles: {
+        create: {
+            anonymous: {{requiredRoles.create.anonymous}},
+            roles: [{{for role in requiredRoles.create.roles}}"{{role}}",{{end}}]
+        },
+        read: {
+            anonymous: {{requiredRoles.read.anonymous}},
+            roles: [{{for role in requiredRoles.read.roles}}"{{role}}",{{end}}]
+        },
+        update: {
+            anonymous: {{requiredRoles.update.anonymous}},
+            roles: [{{for role in requiredRoles.update.roles}}"{{role}}",{{end}}]
+        },
+        delete: {
+            anonymous: {{requiredRoles.delete.anonymous}},
+            roles: [{{for role in requiredRoles.delete.roles}}"{{role}}",{{end}}]
+        }
+    }
 }
 
 export { {{typeNameLC}}Definition }

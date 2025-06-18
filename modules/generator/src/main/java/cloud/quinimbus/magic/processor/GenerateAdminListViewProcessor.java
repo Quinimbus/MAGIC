@@ -65,12 +65,12 @@ public class GenerateAdminListViewProcessor extends MagicClassProcessor {
                     config = mapper.readValue(is, AdminUIConfig.class);
                 }
             } else {
-                config = new AdminUIConfig(null, null, null);
+                config = new AdminUIConfig(null, null, null, null);
             }
             var outPath = rootPath.resolve("target/magic/admin-ui/");
             srcPath = outPath.resolve("src");
             Files.createDirectories(srcPath);
-            var skeletonGen = new AdminSkeletonGenerator(outPath, config, this.processingEnv.getOptions());
+            var skeletonGen = new AdminSkeletonGenerator(outPath, config, this.processingEnv.getOptions(), true);
             skeletonGen.generateSkeleton();
         } catch (IOException ex) {
             throw new IllegalStateException(ex);

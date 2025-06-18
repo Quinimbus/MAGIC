@@ -6,6 +6,7 @@ export default function initialState(pinia: Pinia) {
     const appConfig = useAppConfigStore(pinia);
     appConfig.setBasePath("http://localhost:8080");
     appConfig.setName("{{apptitle}}");
+    appConfig.setOidcActive({{oidcActive}});
     appConfig.setVersion("{{appversion}}");
 
     const types = useTypesStore(pinia);

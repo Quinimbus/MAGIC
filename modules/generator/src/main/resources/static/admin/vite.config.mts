@@ -27,7 +27,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           'admin-ui': ['@quinimbus/admin-ui'],
-          'vue': ['pinia', 'vue', 'vue-router'],
+          'vue': ['pinia', 'vue', 'vue-router', 'vue3-oidc'],
         }
       }
     }

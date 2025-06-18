@@ -5,12 +5,14 @@ import cloud.quinimbus.magic.classnames.QuiNimbusBinarystore;
 import cloud.quinimbus.magic.classnames.QuiNimbusCommon;
 import cloud.quinimbus.magic.config.AdminUIConfig;
 import cloud.quinimbus.magic.config.AdminUIConfigLoader;
+import cloud.quinimbus.magic.elements.MagicAnnotationElement;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
 import cloud.quinimbus.magic.util.Strings;
 import static cloud.quinimbus.magic.util.Strings.*;
 import io.marioslab.basis.template.TemplateContext;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class TSContextGenerator {
@@ -30,6 +32,11 @@ public class TSContextGenerator {
             List<TSAllowedValue> allowedValues) {}
 
     public static record GlobalAction(String key, String label, String icon) {}
+
+    public static record RequiredRoles(
+            RequiredRole create, RequiredRole read, RequiredRole update, RequiredRole delete) {}
+
+    public static record RequiredRole(boolean anonymous, Set<String> roles) {}
 
     public static TemplateContext createTypeContext(
             AdminUIConfig.Type typeConfig,
@@ -119,6 +126,7 @@ public class TSContextGenerator {
                             return new GlobalAction(a, config.label(), config.icon());
                         })
                         .toList());
+        context.set("requiredRoles", requiredRoles(recordElement));
         return context;
     }
 
@@ -167,5 +175,38 @@ public class TSContextGenerator {
                     .toList();
         }
         return List.of();
+    }
+
+    private static RequiredRoles requiredRoles(MagicClassElement recordElement) {
+        var crudRolesAllowedAnno = recordElement.findAnnotation(QuiNimbusCommon.CRUD_ROLES_ALLOWED_NAME);
+        return new RequiredRoles(
+                crudRolesAllowedAnno.map(anno -> requiredRole("create", anno)).orElse(new RequiredRole(true, Set.of())),
+                crudRolesAllowedAnno.map(anno -> requiredRole("read", anno)).orElse(new RequiredRole(true, Set.of())),
+                crudRolesAllowedAnno.map(anno -> requiredRole("update", anno)).orElse(new RequiredRole(true, Set.of())),
+                crudRolesAllowedAnno
+                        .map(anno -> requiredRole("delete", anno))
+                        .orElse(new RequiredRole(true, Set.of())));
+    }
+
+    private static RequiredRole requiredRole(String annotationElement, MagicAnnotationElement anno) {
+        var permissionAnno =
+                anno.<MagicAnnotationElement>getElementValue(annotationElement).orElseThrow();
+        var permissionType = permissionAnno
+                .<MagicVariableElement>getElementValue("value")
+                .map(MagicVariableElement::getSimpleName)
+                .orElseThrow();
+        return switch (permissionType) {
+            case "ANONYMOUS" -> new RequiredRole(true, Set.of());
+            case "AUTHENTICATED" -> new RequiredRole(false, Set.of());
+            case "ROLES" -> new RequiredRole(
+                    false,
+                    permissionAnno
+                            .<List<String>>getElementValue("roles")
+                            .map(Set::copyOf)
+                            .orElseThrow());
+            default -> throw new IllegalArgumentException(
+                    "Unknown permission type %s, did you mix different versions of Quinimbus dependencies?"
+                            .formatted(permissionType));
+        };
     }
 }

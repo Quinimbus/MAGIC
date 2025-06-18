@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { {{typeNameLC}}Definition, {{typeNameUC}} } from '@/domain'
-import { {{if hasBinaryField}}BinaryTypeView, {{end}}{{if hasBooleanField}}BooleanTypeView, {{end}}EntityView, RestBasedEntityListDataSource{{if hasReferenceField}}, ReferenceTypeView{{end}} } from '@quinimbus/admin-ui';
+import { {{if hasBinaryField}}BinaryTypeView, {{end}}{{if hasBooleanField}}BooleanTypeView, {{end}}EntityView, RestBasedEntityListDataSource{{if hasReferenceField}}, ReferenceTypeView{{end}}, useAuthStore } from '@quinimbus/admin-ui';
 import { useAppConfigStore } from '@quinimbus/admin-ui';
 
 const basePath = useAppConfigStore().basePath;
-const datasource = new RestBasedEntityListDataSource<{{typeNameUC}}>({{typeNameUC}}, basePath, {{typeNameLC}}Definition)
+const auth = useAuthStore();
+const datasource = new RestBasedEntityListDataSource<{{typeNameUC}}>({{typeNameUC}}, basePath, () => auth.token, {{typeNameLC}}Definition)
 const entityFactory = () => new {{typeNameUC}}();
 </script>
 

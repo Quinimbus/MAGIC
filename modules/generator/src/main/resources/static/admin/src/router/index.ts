@@ -1,5 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { AppLayout,  toRoute } from '@quinimbus/admin-ui'
+import { createRouter, createWebHistory, type RouteComponent } from 'vue-router'
+import { AppLayout, guardRoutesByRoles, OIDCCallbackView, toRoute } from '@quinimbus/admin-ui'
 import entityTypeDefinitions from '@/domain'
 
 const router = createRouter({
@@ -7,12 +7,20 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      component: AppLayout,
+      name: 'home',
+      component: AppLayout as RouteComponent,
       props: { entityTypeDefinitions: entityTypeDefinitions },
       children: entityTypeDefinitions.map(toRoute)
+    },
+    {
+      path: "/oidc-callback",
+      name: 'oidc-callback',
+      component: OIDCCallbackView,
     }
   ]
    
 })
+
+router.beforeEach(guardRoutesByRoles)
 
 export default router

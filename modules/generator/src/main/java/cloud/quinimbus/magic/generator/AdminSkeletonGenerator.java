@@ -16,12 +16,15 @@ public class AdminSkeletonGenerator {
     private final AdminUIConfig config;
     private final TemplateRenderer templateRenderer;
     private final Map<String, String> processorOptions;
+    private final boolean oidcActive;
 
-    public AdminSkeletonGenerator(Path adminUiPath, AdminUIConfig config, Map<String, String> processorOptions) {
+    public AdminSkeletonGenerator(
+            Path adminUiPath, AdminUIConfig config, Map<String, String> processorOptions, boolean oidcActive) {
         this.adminUiPath = adminUiPath;
         this.config = config;
         this.templateRenderer = new TemplateRenderer(adminUiPath);
         this.processorOptions = processorOptions;
+        this.oidcActive = oidcActive;
     }
 
     public void generateSkeleton() {
@@ -32,6 +35,10 @@ public class AdminSkeletonGenerator {
             generatePackageJson(adminUiDependencyLocal);
             generateIndexHtml();
             generateInitialState();
+            generateMainTs();
+            if (oidcActive) {
+                generateOidcTs();
+            }
             Files.createDirectories(adminUiPath.resolve("docker"));
             Files.createDirectories(adminUiPath.resolve("src/assets"));
             Files.createDirectories(adminUiPath.resolve("src/router"));
@@ -48,7 +55,6 @@ public class AdminSkeletonGenerator {
             copyFile("src/assets/styles.scss");
             copyFile("src/assets/tailwind.css");
             copyFile("src/App.vue");
-            copyFile("src/main.ts");
             copyFile("src/router/index.ts");
             if (adminUiDependencyLocal) {
                 var source = Paths.get(config.dependencies().adminUi().version().substring(5));
@@ -85,6 +91,7 @@ public class AdminSkeletonGenerator {
         var context = new TemplateContext();
         context.set("apptitle", config.app().name());
         context.set("appversion", config.app().version());
+        context.set("oidcActive", oidcActive);
         templateRenderer.generateFromTemplate("src/initialState.ts", context);
     }
 
@@ -94,6 +101,19 @@ public class AdminSkeletonGenerator {
         context.set("nodeVersion", config.dependencies().node().version());
         context.set("adminUiLocal", config.dependencies().adminUi().version().startsWith("file:"));
         templateRenderer.generateFromTemplate("Dockerfile", context);
+    }
+
+    private void generateMainTs() {
+        var context = new TemplateContext();
+        context.set("oidcActive", oidcActive);
+        templateRenderer.generateFromTemplate("src/main.ts", context);
+    }
+
+    private void generateOidcTs() {
+        var context = new TemplateContext();
+        context.set("authority", config.oidc().authority());
+        context.set("clientId", config.oidc().clientId());
+        templateRenderer.generateFromTemplate("src/oidc.ts", context);
     }
 
     private void copyFile(String path) {

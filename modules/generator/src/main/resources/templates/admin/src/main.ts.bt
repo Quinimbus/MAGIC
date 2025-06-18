@@ -8,7 +8,8 @@ import ToastService from 'primevue/toastservice';
 import App from './App.vue'
 import router from './router'
 
-import initialState from './initialState'
+import initialState from './initialState'{{if oidcActive}}
+import './oidc'{{end}}
 
 import '@/assets/styles.scss';
 import '@/assets/tailwind.css';
