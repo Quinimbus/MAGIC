@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory, type RouteComponent } from 'vue-router'
 import { AppLayout, dashboardRoute, guardRoutesByRoles, oidcCallbackRoute, toRoute } from '@quinimbus/admin-ui'
-import entityTypeDefinitions from '@/domain'
+import entityTypeDefinitions, { contentGroups } from '@/domain'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -9,9 +9,9 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: AppLayout as RouteComponent,
-      props: { entityTypeDefinitions: entityTypeDefinitions },
+      props: { entityTypeDefinitions: entityTypeDefinitions, groups: contentGroups },
       children: [
-        dashboardRoute(entityTypeDefinitions),
+        dashboardRoute(entityTypeDefinitions, contentGroups),
         ...entityTypeDefinitions.map(toRoute)
       ]
     },

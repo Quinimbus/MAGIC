@@ -3,6 +3,7 @@ package cloud.quinimbus.magic.processor;
 import cloud.quinimbus.magic.classnames.QuiNimbusCommon;
 import cloud.quinimbus.magic.classnames.QuiNimbusMagic;
 import cloud.quinimbus.magic.config.AdminUIConfig;
+import cloud.quinimbus.magic.config.AdminUIConfigLoader;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.elements.MagicExecutableElement;
 import cloud.quinimbus.magic.generator.AdminListViewGenerator;
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -65,7 +67,7 @@ public class GenerateAdminListViewProcessor extends MagicClassProcessor {
                     config = mapper.readValue(is, AdminUIConfig.class);
                 }
             } else {
-                config = new AdminUIConfig(null, null, null, null);
+                config = new AdminUIConfig(null, null, null, null, null);
             }
             var outPath = rootPath.resolve("target/magic/admin-ui/");
             srcPath = outPath.resolve("src");
@@ -101,7 +103,14 @@ public class GenerateAdminListViewProcessor extends MagicClassProcessor {
             Set<MagicClassElement> typeElements,
             Set<MagicExecutableElement> executableElements) {
         var domainPath = srcPath.resolve("domain");
-        var gen = new AdminListViewIndexGenerator(typeElements, domainPath);
+        var gen = new AdminListViewIndexGenerator(
+                typeElements.stream()
+                        .sorted(Comparator.comparing(
+                                c -> AdminUIConfigLoader.getTypeConfig(config, c.getSimpleName(), "")
+                                        .orderKey()))
+                        .toList(),
+                domainPath,
+                config);
         gen.generateIndex();
     }
 }

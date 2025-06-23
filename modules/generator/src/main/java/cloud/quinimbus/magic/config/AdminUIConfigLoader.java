@@ -7,7 +7,14 @@ import java.util.Map;
 public class AdminUIConfigLoader {
     public static AdminUIConfig.Type getTypeConfig(AdminUIConfig config, String name, String idFieldName) {
         var defaultConfig = new cloud.quinimbus.magic.config.AdminUIConfig.Type(
-                "database", capitalize(name), capitalize(IDs.toPlural(name)), idFieldName, Map.of(), Map.of());
+                "database",
+                capitalize(name),
+                capitalize(IDs.toPlural(name)),
+                idFieldName,
+                null,
+                null,
+                Map.of(),
+                Map.of());
         var providedConfig = config.types().get(uncapitalize(name));
         if (providedConfig == null) {
             return defaultConfig;
@@ -17,6 +24,8 @@ public class AdminUIConfigLoader {
                 providedConfig.labelSingular() == null ? defaultConfig.labelSingular() : providedConfig.labelSingular(),
                 providedConfig.labelPlural() == null ? defaultConfig.labelPlural() : providedConfig.labelPlural(),
                 providedConfig.keyField() == null ? defaultConfig.keyField() : providedConfig.keyField(),
+                providedConfig.group(),
+                providedConfig.orderKey(),
                 providedConfig.fields() == null ? defaultConfig.fields() : providedConfig.fields(),
                 providedConfig.globalActions() == null
                         ? defaultConfig.globalActions()

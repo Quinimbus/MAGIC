@@ -37,7 +37,8 @@ const {{typeNameLC}}Definition: TypeDefinition = {
     labelPlural: "{{labelPlural}}",
     listView: {{typeNameLCPlural}}View{{if weak}},
     weak: true,
-    owningType: "{{owningType}}"{{end}},
+    owningType: "{{owningType}}"{{end}},{{if hasGroup}}
+    group: "{{group}}",{{end}}
     globalActions: [{{for action in globalActions}}
         {
             key: "{{action.key}}",

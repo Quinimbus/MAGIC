@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record AdminUIConfig(App app, Map<String, Type> types, Dependencies dependencies, Oidc oidc) {
+public record AdminUIConfig(
+        App app, Map<String, Type> types, Dependencies dependencies, Oidc oidc, Map<String, MenuGroup> menugroups) {
 
     public AdminUIConfig {
         if (app == null) {
@@ -18,6 +19,9 @@ public record AdminUIConfig(App app, Map<String, Type> types, Dependencies depen
         }
         if (oidc == null) {
             oidc = new Oidc(null, null);
+        }
+        if (menugroups == null) {
+            menugroups = Map.of();
         }
     }
 
@@ -81,6 +85,8 @@ public record AdminUIConfig(App app, Map<String, Type> types, Dependencies depen
             String labelSingular,
             String labelPlural,
             String keyField,
+            String group,
+            Integer orderKey,
             Map<String, Field> fields,
             Map<String, GlobalAction> globalActions) {
 
@@ -90,6 +96,9 @@ public record AdminUIConfig(App app, Map<String, Type> types, Dependencies depen
             }
             if (fields == null) {
                 fields = Map.of();
+            }
+            if (orderKey == null) {
+                orderKey = 0;
             }
         }
     }
@@ -114,6 +123,15 @@ public record AdminUIConfig(App app, Map<String, Type> types, Dependencies depen
 
         public GlobalAction withIcon(String icon) {
             return new cloud.quinimbus.magic.config.AdminUIConfig.GlobalAction(label, icon);
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static record MenuGroup(String label, Integer orderKey) {
+        public MenuGroup {
+            if (orderKey == null) {
+                orderKey = 0;
+            }
         }
     }
 }

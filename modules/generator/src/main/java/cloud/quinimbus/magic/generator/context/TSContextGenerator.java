@@ -61,6 +61,8 @@ public class TSContextGenerator {
         context.set("typeNameUCPlural", capitalize(IDs.toPlural(name)));
         context.set("weak", weak);
         context.set("owningType", weak ? uncapitalize(owningType.getSimpleName()) : null);
+        context.set("hasGroup", typeConfig.group() != null);
+        context.set("group", typeConfig.group());
         context.set(
                 "containsBinary",
                 recordElement

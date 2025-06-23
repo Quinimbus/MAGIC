@@ -5,3 +5,9 @@
 const entityTypeDefinitions = [{{for index, type in types}}{{if index != 0}}, {{end}}{{type.nameLC}}Definition{{end}}]
 
 export default entityTypeDefinitions
+
+export const contentGroups = { {{for group in groups}}
+    {{group.key}}: {
+        label: "{{group.label}}"
+    },{{end}}
+}
