@@ -14,10 +14,13 @@ public class AdminListViewGenerator extends RecordEntityBasedGenerator {
 
     private final AdminUIConfig config;
     private final TemplateRenderer templateRenderer;
-    private final List<String> globalActions;
+    private final List<RecordContextActionDefinition> globalActions;
 
     public AdminListViewGenerator(
-            MagicClassElement recordElement, Path viewsPath, AdminUIConfig config, List<String> globalActions) {
+            MagicClassElement recordElement,
+            Path viewsPath,
+            AdminUIConfig config,
+            List<RecordContextActionDefinition> globalActions) {
         super(recordElement);
         this.config = config;
         this.templateRenderer = new TemplateRenderer(viewsPath);

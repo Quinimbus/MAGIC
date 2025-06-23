@@ -85,7 +85,6 @@ public class GenerateAdminListViewProcessor extends MagicClassProcessor {
             var viewsPath = srcPath.resolve("views");
             Files.createDirectories(viewsPath);
             var globalActions = recordContextActions.getOrDefault(element, Set.of()).stream()
-                    .map(RecordContextActionDefinition::name)
                     .toList();
             var typegen = new AdminListViewTypeGenerator(element, domainPath, config, globalActions);
             typegen.generateType();

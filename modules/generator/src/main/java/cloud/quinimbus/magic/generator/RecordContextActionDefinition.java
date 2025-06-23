@@ -22,9 +22,11 @@ public record RecordContextActionDefinition(ClassName type, String name, Method 
                         method.getSimpleName(), method));
     }
 
-    public static Map<MagicClassElement, Set<RecordContextActionDefinition>> fromExecutableElements(Set<MagicExecutableElement> methods) {
+    public static Map<MagicClassElement, Set<RecordContextActionDefinition>> fromExecutableElements(
+            Set<MagicExecutableElement> methods) {
         return methods.stream()
                 .filter(e -> e.isAnnotatedWith(QuiNimbusCommon.ACTION_NAME))
+                .filter(e -> e.isAnnotatedWith(QuiNimbusCommon.RECORD_TYPE_CONTEXT_NAME))
                 .collect(Collectors.groupingBy(
                         e -> e.findAnnotation(QuiNimbusCommon.RECORD_TYPE_CONTEXT_NAME)
                                 .flatMap(a -> a.getElementValue("value").map(MagicClassElement.class::cast))

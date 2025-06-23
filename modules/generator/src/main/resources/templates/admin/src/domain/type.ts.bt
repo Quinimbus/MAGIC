@@ -42,7 +42,11 @@ const {{typeNameLC}}Definition: TypeDefinition = {
         {
             key: "{{action.key}}",
             label: "{{action.label}}",
-            icon: "{{action.icon}}"
+            icon: "{{action.icon}}",
+            requiredRoles: {
+                anonymous: {{action.requiredRole.anonymous}},
+                roles: [{{for role in action.requiredRole.roles}}"{{role}}",{{end}}]
+            }
         },{{end}}
     ],
     requiredRoles: {

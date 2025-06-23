@@ -13,10 +13,13 @@ public class AdminListViewTypeGenerator extends RecordEntityBasedGenerator {
 
     private final AdminUIConfig config;
     private final TemplateRenderer templateRenderer;
-    private final List<String> globalActions;
+    private final List<RecordContextActionDefinition> globalActions;
 
     public AdminListViewTypeGenerator(
-            MagicClassElement recordElement, Path domainPath, AdminUIConfig config, List<String> globalActions) {
+            MagicClassElement recordElement,
+            Path domainPath,
+            AdminUIConfig config,
+            List<RecordContextActionDefinition> globalActions) {
         super(recordElement);
         this.config = config;
         this.templateRenderer = new TemplateRenderer(domainPath);

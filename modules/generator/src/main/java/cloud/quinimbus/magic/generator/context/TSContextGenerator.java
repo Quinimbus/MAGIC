@@ -8,6 +8,7 @@ import cloud.quinimbus.magic.config.AdminUIConfigLoader;
 import cloud.quinimbus.magic.elements.MagicAnnotationElement;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
+import cloud.quinimbus.magic.generator.RecordContextActionDefinition;
 import cloud.quinimbus.magic.util.Strings;
 import static cloud.quinimbus.magic.util.Strings.*;
 import io.marioslab.basis.template.TemplateContext;
@@ -32,7 +33,7 @@ public class TSContextGenerator {
             String enumName,
             List<TSAllowedValue> allowedValues) {}
 
-    public static record GlobalAction(String key, String label, String icon) {}
+    public static record GlobalAction(String key, String label, String icon, RequiredRole requiredRole) {}
 
     public static record RequiredRoles(
             RequiredRole create, RequiredRole read, RequiredRole update, RequiredRole delete) {}
@@ -48,7 +49,7 @@ public class TSContextGenerator {
             String ownerField,
             boolean idGenerated,
             String idFieldName,
-            List<String> globalActions) {
+            List<RecordContextActionDefinition> globalActions) {
         var context = new TemplateContext();
         context.set("keyField", typeConfig.keyField());
         context.set("icon", typeConfig.icon());
@@ -130,8 +131,16 @@ public class TSContextGenerator {
                 "globalActions",
                 globalActions.stream()
                         .map(a -> {
-                            var config = AdminUIConfigLoader.getGlobalActionConfig(typeConfig, a);
-                            return new GlobalAction(a, config.label(), config.icon());
+                            var config = AdminUIConfigLoader.getGlobalActionConfig(typeConfig, a.name());
+                            return new GlobalAction(
+                                    a.name(),
+                                    config.label(),
+                                    config.icon(),
+                                    requiredRole(
+                                            "call",
+                                            a.method()
+                                                    .element()
+                                                    .findAnnotation(QuiNimbusCommon.ACTION_ROLES_ALLOWED_NAME)));
                         })
                         .toList());
         context.set("requiredRoles", requiredRoles(recordElement));
@@ -233,5 +242,9 @@ public class TSContextGenerator {
                     "Unknown permission type %s, did you mix different versions of Quinimbus dependencies?"
                             .formatted(permissionType));
         };
+    }
+
+    private static RequiredRole requiredRole(String annotationElement, Optional<MagicAnnotationElement> anno) {
+        return anno.map(a -> requiredRole(annotationElement, a)).orElse(new RequiredRole(true, Set.of()));
     }
 }
