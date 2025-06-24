@@ -15,16 +15,19 @@ public class AdminListViewGenerator extends RecordEntityBasedGenerator {
     private final AdminUIConfig config;
     private final TemplateRenderer templateRenderer;
     private final List<RecordContextActionDefinition> globalActions;
+    private final List<RecordInstanceContextActionDefinition> instanceActions;
 
     public AdminListViewGenerator(
             MagicClassElement recordElement,
             Path viewsPath,
             AdminUIConfig config,
-            List<RecordContextActionDefinition> globalActions) {
+            List<RecordContextActionDefinition> globalActions,
+            List<RecordInstanceContextActionDefinition> instanceActions) {
         super(recordElement);
         this.config = config;
         this.templateRenderer = new TemplateRenderer(viewsPath);
         this.globalActions = globalActions;
+        this.instanceActions = instanceActions;
     }
 
     public void generateView() {
@@ -38,7 +41,8 @@ public class AdminListViewGenerator extends RecordEntityBasedGenerator {
                 ownerField(),
                 idGenerated,
                 idFieldName,
-                globalActions);
+                globalActions,
+                instanceActions);
         this.templateRenderer.generateFromTemplate(
                 "src/views/ListView.vue", "%sListView.vue".formatted(capitalize(IDs.toPlural(name))), context);
     }

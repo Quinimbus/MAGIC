@@ -14,6 +14,7 @@ public class AdminUIConfigLoader {
                 null,
                 null,
                 Map.of(),
+                Map.of(),
                 Map.of());
         var providedConfig = config.types().get(uncapitalize(name));
         if (providedConfig == null) {
@@ -27,9 +28,10 @@ public class AdminUIConfigLoader {
                 providedConfig.group(),
                 providedConfig.orderKey(),
                 providedConfig.fields() == null ? defaultConfig.fields() : providedConfig.fields(),
-                providedConfig.globalActions() == null
-                        ? defaultConfig.globalActions()
-                        : providedConfig.globalActions());
+                providedConfig.globalActions() == null ? defaultConfig.globalActions() : providedConfig.globalActions(),
+                providedConfig.instanceActions() == null
+                        ? defaultConfig.instanceActions()
+                        : providedConfig.instanceActions());
     }
 
     public static AdminUIConfig.Field getFieldConfig(AdminUIConfig.Type typeConfig, String field) {
@@ -38,10 +40,23 @@ public class AdminUIConfigLoader {
                 .getOrDefault(field, new cloud.quinimbus.magic.config.AdminUIConfig.Field(capitalize(field), null));
     }
 
-    public static AdminUIConfig.GlobalAction getGlobalActionConfig(AdminUIConfig.Type typeConfig, String action) {
+    public static AdminUIConfig.Action getGlobalActionConfig(AdminUIConfig.Type typeConfig, String action) {
         var config = typeConfig
                 .globalActions()
-                .getOrDefault(action, new AdminUIConfig.GlobalAction("Action: " + action, "cog-play"));
+                .getOrDefault(action, new AdminUIConfig.Action("Action: " + action, "cog-play"));
+        if (config.icon() == null || config.icon().isEmpty()) {
+            config = config.withIcon("cog-play");
+        }
+        if (config.label() == null || config.label().isEmpty()) {
+            config = config.withLabel("Action: " + action);
+        }
+        return config;
+    }
+
+    public static AdminUIConfig.Action getInstanceActionConfig(AdminUIConfig.Type typeConfig, String action) {
+        var config = typeConfig
+                .globalActions()
+                .getOrDefault(action, new AdminUIConfig.Action("Action: " + action, "cog-play"));
         if (config.icon() == null || config.icon().isEmpty()) {
             config = config.withIcon("cog-play");
         }

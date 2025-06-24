@@ -11,6 +11,7 @@ import cloud.quinimbus.magic.generator.AdminListViewIndexGenerator;
 import cloud.quinimbus.magic.generator.AdminListViewTypeGenerator;
 import cloud.quinimbus.magic.generator.AdminSkeletonGenerator;
 import cloud.quinimbus.magic.generator.RecordContextActionDefinition;
+import cloud.quinimbus.magic.generator.RecordInstanceContextActionDefinition;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.IOException;
@@ -38,6 +39,9 @@ public class GenerateAdminListViewProcessor extends MagicClassProcessor {
 
     private Map<MagicClassElement, Set<RecordContextActionDefinition>> recordContextActions = new LinkedHashMap<>();
 
+    private Map<MagicClassElement, Set<RecordInstanceContextActionDefinition>> instanceContextActions =
+            new LinkedHashMap<>();
+
     @Override
     public void setup(RoundEnvironment re) {}
 
@@ -48,6 +52,8 @@ public class GenerateAdminListViewProcessor extends MagicClassProcessor {
             Set<MagicExecutableElement> executableElements) {
         try {
             recordContextActions.putAll(RecordContextActionDefinition.fromExecutableElements(executableElements));
+            instanceContextActions.putAll(
+                    RecordInstanceContextActionDefinition.fromExecutableElements(executableElements));
             var fooResource = processingEnv
                     .getFiler()
                     .createResource(
@@ -88,9 +94,11 @@ public class GenerateAdminListViewProcessor extends MagicClassProcessor {
             Files.createDirectories(viewsPath);
             var globalActions = recordContextActions.getOrDefault(element, Set.of()).stream()
                     .toList();
-            var typegen = new AdminListViewTypeGenerator(element, domainPath, config, globalActions);
+            var instanceActions = instanceContextActions.getOrDefault(element, Set.of()).stream()
+                    .toList();
+            var typegen = new AdminListViewTypeGenerator(element, domainPath, config, globalActions, instanceActions);
             typegen.generateType();
-            var viewgen = new AdminListViewGenerator(element, viewsPath, config, globalActions);
+            var viewgen = new AdminListViewGenerator(element, viewsPath, config, globalActions, instanceActions);
             viewgen.generateView();
         } catch (IOException ex) {
             throw new IllegalStateException(ex);

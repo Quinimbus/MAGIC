@@ -14,16 +14,19 @@ public class AdminListViewTypeGenerator extends RecordEntityBasedGenerator {
     private final AdminUIConfig config;
     private final TemplateRenderer templateRenderer;
     private final List<RecordContextActionDefinition> globalActions;
+    private final List<RecordInstanceContextActionDefinition> instanceActions;
 
     public AdminListViewTypeGenerator(
             MagicClassElement recordElement,
             Path domainPath,
             AdminUIConfig config,
-            List<RecordContextActionDefinition> globalActions) {
+            List<RecordContextActionDefinition> globalActions,
+            List<RecordInstanceContextActionDefinition> instanceActions) {
         super(recordElement);
         this.config = config;
         this.templateRenderer = new TemplateRenderer(domainPath);
         this.globalActions = globalActions;
+        this.instanceActions = instanceActions;
     }
 
     public void generateType() {
@@ -37,7 +40,8 @@ public class AdminListViewTypeGenerator extends RecordEntityBasedGenerator {
                 ownerField(),
                 idGenerated,
                 idFieldName,
-                globalActions);
+                globalActions,
+                instanceActions);
         this.templateRenderer.generateFromTemplate("src/domain/type.ts", "%s.ts".formatted(capitalize(name)), context);
     }
 }

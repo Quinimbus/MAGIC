@@ -9,6 +9,7 @@ import cloud.quinimbus.magic.generator.EntityMapperDefinition;
 import cloud.quinimbus.magic.generator.EntityNamingMapperGenerator;
 import cloud.quinimbus.magic.generator.EntitySingleRestResourceGenerator;
 import cloud.quinimbus.magic.generator.RecordContextActionDefinition;
+import cloud.quinimbus.magic.generator.RecordInstanceContextActionDefinition;
 import cloud.quinimbus.magic.spec.MagicTypeSpec;
 import com.squareup.javapoet.ClassName;
 import java.io.IOException;
@@ -39,6 +40,9 @@ public class GenerateRestEndpointsProcessor extends MagicClassProcessor {
 
     private Map<MagicClassElement, Set<RecordContextActionDefinition>> recordContextActions = new LinkedHashMap<>();
 
+    private Map<MagicClassElement, Set<RecordInstanceContextActionDefinition>> recordInstanceContextActions =
+            new LinkedHashMap<>();
+
     private boolean quarkusRestReactiveWorkaround;
 
     @Override
@@ -68,6 +72,8 @@ public class GenerateRestEndpointsProcessor extends MagicClassProcessor {
                                 .orElseThrow(),
                         Collectors.mapping(this::toMapperDefinition, Collectors.toList()))));
         recordContextActions.putAll(RecordContextActionDefinition.fromExecutableElements(executableElements));
+        recordInstanceContextActions.putAll(
+                RecordInstanceContextActionDefinition.fromExecutableElements(executableElements));
     }
 
     @Override
@@ -85,6 +91,7 @@ public class GenerateRestEndpointsProcessor extends MagicClassProcessor {
                         element,
                         entityChildren.get(element),
                         entityMappers.get(element),
+                        recordInstanceContextActions.get(element),
                         quarkusRestReactiveWorkaround);
                 this.writeTypeFile(singleGen.generateSingleResource());
                 var allGen = new EntityAllRestResourceGenerator(

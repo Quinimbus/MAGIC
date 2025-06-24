@@ -19,6 +19,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
 
@@ -28,16 +29,21 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
 
     private final List<EntityMapperDefinition> entityMappers;
 
+    private final Set<RecordInstanceContextActionDefinition> recordInstanceContextActionDefinitions;
+
     private final boolean quarkusRestReactiveWorkaround;
 
     public EntitySingleRestResourceGenerator(
             MagicClassElement recordElement,
             List<MagicClassElement> entityChildren,
             List<EntityMapperDefinition> entityMappers,
+            Set<RecordInstanceContextActionDefinition> recordInstanceContextActionDefinitions,
             boolean quarkusRestReactiveWorkaround) {
         super(recordElement);
         this.entityChildren = entityChildren != null ? entityChildren : List.of();
         this.entityMappers = entityMappers != null ? entityMappers : List.of();
+        this.recordInstanceContextActionDefinitions =
+                recordInstanceContextActionDefinitions != null ? recordInstanceContextActionDefinitions : Set.of();
         this.quarkusRestReactiveWorkaround = quarkusRestReactiveWorkaround;
     }
 
@@ -77,6 +83,11 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .map(e -> FieldSpec.builder(e.type(), uncapitalize(e.name()), Modifier.PRIVATE, Modifier.FINAL)
                         .build())
                 .forEach(singleResourceTypeBuilder::addField);
+        recordInstanceContextActionDefinitions.stream()
+                .map(e -> FieldSpec.builder(
+                                e.type(), uncapitalize(e.type().simpleName()), Modifier.PRIVATE, Modifier.FINAL)
+                        .build())
+                .forEach(singleResourceTypeBuilder::addField);
         this.recordElement
                 .findFieldsOfType(QuiNimbusBinarystore.EMBEDDABLE_BINARY)
                 .forEach(ve -> singleResourceTypeBuilder.addMethod(createBinaryDownload(ve)));
@@ -93,6 +104,9 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .flatMap(e -> e.methods().stream())
                 .map(e -> createMappedAsMethod(e))
                 .forEach(singleResourceTypeBuilder::addMethod);
+        recordInstanceContextActionDefinitions.stream()
+                .map(e -> createActionMethod(e))
+                .forEach(singleResourceTypeBuilder::addMethod);
         return new MagicTypeSpec(singleResourceTypeBuilder.build(), packageName);
     }
 
@@ -107,14 +121,19 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
     }
 
     private MethodSpec constructor() {
-        var additionalParameters = Stream.concat(
+        var additionalParameters = Stream.of(
                         entityChildren.stream().map(e -> ParameterSpec.builder(
                                         repository(e),
                                         uncapitalize(repository(e).simpleName()))
                                 .build()),
                         entityMappers.stream().map(e -> ParameterSpec.builder(e.type(), uncapitalize(e.name()))
+                                .build()),
+                        recordInstanceContextActionDefinitions.stream().map(e -> ParameterSpec.builder(
+                                        e.type(), uncapitalize(e.type().simpleName()))
                                 .build()))
-                .toList();
+                .reduce(Stream::concat)
+                .map(Stream::toList)
+                .orElseGet(List::of);
         var constructor = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
         var code = CodeBlock.builder();
         if (weak()) {
@@ -259,7 +278,7 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .addParameter(injectUriInfo())
                 .returns(Jakarta.RS_RESPONSE)
                 .addStatement("return super.deleteById(uriInfo)");
-       if (weak()) {
+        if (weak()) {
             spec.addAnnotation(ownerIdPathParameter());
         }
         return spec.build();
@@ -348,6 +367,30 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
 
     private AnnotationSpec idPathParameter() {
         return pathParameter(name + "Id", "The id of the %s".formatted(name));
+    }
+
+    private MethodSpec createActionMethod(RecordInstanceContextActionDefinition definition) {
+        var spec = MethodSpec.methodBuilder("callAction%s".formatted(capitalize(definition.name())))
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(AnnotationSpec.builder(Jakarta.RS_POST).build())
+                .addAnnotation(path("/action/%s".formatted(uncapitalize(definition.name()))))
+                .addAnnotation(secureActionEndpoint(definition.method().element(), ActionType.CALL))
+                .addAnnotation(operation(
+                        "Call%sAction%s"
+                                .formatted(
+                                        capitalize(IDs.toPlural(Records.idFromType(recordElement))),
+                                        capitalize(definition.name())),
+                        "Call the global type action %s of type %s".formatted(definition.name(), name)))
+                .addAnnotation(emptyResponse("204"))
+                .addParameter(injectUriInfo())
+                .addCode(
+                        "this.findEntityById(uriInfo).ifPresentOrElse($L::$L, () -> {throw new WebApplicationException(Response.Status.NOT_FOUND);});",
+                        uncapitalize(definition.type().simpleName()),
+                        definition.method().name());
+        if (weak()) {
+            spec.addAnnotation(ownerIdPathParameter());
+        }
+        return spec.build();
     }
 
     private AnnotationSpec ownerIdPathParameter() {

@@ -88,7 +88,8 @@ public record AdminUIConfig(
             String group,
             Integer orderKey,
             Map<String, Field> fields,
-            Map<String, GlobalAction> globalActions) {
+            Map<String, Action> globalActions,
+            Map<String, Action> instanceActions) {
 
         public Type {
             if (icon == null || icon.isBlank()) {
@@ -116,13 +117,13 @@ public record AdminUIConfig(
     public static record AllowedValue(String label) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static record GlobalAction(String label, String icon) {
-        public GlobalAction withLabel(String label) {
-            return new cloud.quinimbus.magic.config.AdminUIConfig.GlobalAction(label, icon);
+    public static record Action(String label, String icon) {
+        public Action withLabel(String label) {
+            return new Action(label, icon);
         }
 
-        public GlobalAction withIcon(String icon) {
-            return new cloud.quinimbus.magic.config.AdminUIConfig.GlobalAction(label, icon);
+        public Action withIcon(String icon) {
+            return new Action(label, icon);
         }
     }
 

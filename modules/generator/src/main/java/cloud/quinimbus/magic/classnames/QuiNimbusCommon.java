@@ -13,6 +13,9 @@ public class QuiNimbusCommon {
 
     public static final String NAMING_ANNOTATION_NAME = "cloud.quinimbus.common.annotations.modelling.Naming";
 
+    public static final String RECORD_ENTITY_INSTANCE_CONTEXT_NAME =
+            "cloud.quinimbus.common.annotations.business.RecordEntityInstanceContext";
+
     public static final String RECORD_TYPE_CONTEXT_NAME =
             "cloud.quinimbus.common.annotations.business.RecordTypeContext";
 
