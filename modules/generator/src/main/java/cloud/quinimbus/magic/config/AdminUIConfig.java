@@ -99,14 +99,17 @@ public record AdminUIConfig(
                 fields = Map.of();
             }
             if (orderKey == null) {
-                orderKey = 0;
+                orderKey = Integer.MAX_VALUE;
             }
         }
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static record Field(String label, Map<String, AllowedValue> allowedValues) {
+    public static record Field(String label, Integer orderKey, Map<String, AllowedValue> allowedValues) {
         public Field {
+            if (orderKey == null) {
+                orderKey = Integer.MAX_VALUE;
+            }
             if (allowedValues == null) {
                 allowedValues = Map.of();
             }

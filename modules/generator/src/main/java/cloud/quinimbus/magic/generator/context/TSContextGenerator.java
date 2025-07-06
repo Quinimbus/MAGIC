@@ -13,6 +13,7 @@ import cloud.quinimbus.magic.generator.RecordInstanceContextActionDefinition;
 import cloud.quinimbus.magic.util.Strings;
 import static cloud.quinimbus.magic.util.Strings.*;
 import io.marioslab.basis.template.TemplateContext;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -40,6 +41,9 @@ public class TSContextGenerator {
             RequiredRole create, RequiredRole read, RequiredRole update, RequiredRole delete) {}
 
     public static record RequiredRole(boolean anonymous, Set<String> roles) {}
+
+    public static record FieldWithConfig(MagicVariableElement field, AdminUIConfig.Field config) {}
+    ;
 
     public static TemplateContext createTypeContext(
             AdminUIConfig.Type typeConfig,
@@ -75,37 +79,10 @@ public class TSContextGenerator {
                 "fields",
                 recordElement
                         .findFields()
-                        .map(e -> new TSField(
-                                uncapitalize(e.getSimpleName()),
-                                capitalize(e.getSimpleName()),
-                                toTSType(
-                                        e.typeElement(),
-                                        name,
-                                        e.typeParameters()
-                                                .collect(Collectors.toList())
-                                                .toArray(MagicClassElement[]::new)),
-                                AdminUIConfigLoader.getFieldConfig(typeConfig, e.getSimpleName())
-                                        .label(),
-                                toFieldType(e),
-                                weak && e.getSimpleName().equals(ownerField),
-                                idFieldName.equals(e.getSimpleName()) ? idGenerated : false,
-                                e.findAnnotation(QuiNimbusCommon.REFERENCES_ANNOTATION_NAME)
-                                        .flatMap(ae -> ae.<MagicClassElement>getElementValue("value")
-                                                .map(MagicClassElement::getSimpleName)
-                                                .map(Strings::uncapitalize))
-                                        .orElse(null),
-                                "%s%s"
-                                        .formatted(
-                                                capitalize(name),
-                                                capitalize(
-                                                        e.typeElement().isEnum()
-                                                                ? e.typeElement()
-                                                                        .getSimpleName()
-                                                                : e.typeParameters()
-                                                                        .findAny()
-                                                                        .map(MagicClassElement::getSimpleName)
-                                                                        .orElse("<MissingTypeParameter>"))),
-                                allowedValues(e, AdminUIConfigLoader.getFieldConfig(typeConfig, e.getSimpleName()))))
+                        .map(f -> new FieldWithConfig(
+                                f, AdminUIConfigLoader.getFieldConfig(typeConfig, f.getSimpleName())))
+                        .sorted(Comparator.comparing(f -> f.config().orderKey()))
+                        .map(f -> generateTSField(f, name, weak, ownerField, idGenerated, idFieldName))
                         .toList());
         context.set(
                 "hasBinaryField",
@@ -165,6 +142,43 @@ public class TSContextGenerator {
                         .toList());
         context.set("requiredRoles", requiredRoles(recordElement));
         return context;
+    }
+
+    private static TSField generateTSField(
+            FieldWithConfig f,
+            String typeName,
+            boolean weak,
+            String ownerField,
+            boolean idGenerated,
+            String idFieldName) {
+        var e = f.field();
+        return new TSField(
+                uncapitalize(e.getSimpleName()),
+                capitalize(e.getSimpleName()),
+                toTSType(
+                        e.typeElement(),
+                        typeName,
+                        e.typeParameters().collect(Collectors.toList()).toArray(MagicClassElement[]::new)),
+                f.config().label(),
+                toFieldType(e),
+                weak && e.getSimpleName().equals(ownerField),
+                idFieldName.equals(e.getSimpleName()) ? idGenerated : false,
+                e.findAnnotation(QuiNimbusCommon.REFERENCES_ANNOTATION_NAME)
+                        .flatMap(ae -> ae.<MagicClassElement>getElementValue("value")
+                                .map(MagicClassElement::getSimpleName)
+                                .map(Strings::uncapitalize))
+                        .orElse(null),
+                "%s%s"
+                        .formatted(
+                                capitalize(typeName),
+                                capitalize(
+                                        e.typeElement().isEnum()
+                                                ? e.typeElement().getSimpleName()
+                                                : e.typeParameters()
+                                                        .findAny()
+                                                        .map(MagicClassElement::getSimpleName)
+                                                        .orElse("<MissingTypeParameter>"))),
+                allowedValues(e, f.config()));
     }
 
     private static String toTSType(MagicClassElement classElement, String name, MagicClassElement... typeParameter) {

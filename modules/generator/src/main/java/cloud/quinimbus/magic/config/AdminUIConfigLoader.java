@@ -35,9 +35,15 @@ public class AdminUIConfigLoader {
     }
 
     public static AdminUIConfig.Field getFieldConfig(AdminUIConfig.Type typeConfig, String field) {
-        return typeConfig
+        var fc = typeConfig
                 .fields()
-                .getOrDefault(field, new cloud.quinimbus.magic.config.AdminUIConfig.Field(capitalize(field), null));
+                .getOrDefault(
+                        field, new cloud.quinimbus.magic.config.AdminUIConfig.Field(capitalize(field), null, null));
+        if (fc.label() == null || fc.label().isBlank()) {
+            fc = new cloud.quinimbus.magic.config.AdminUIConfig.Field(
+                    capitalize(field), fc.orderKey(), fc.allowedValues());
+        }
+        return fc;
     }
 
     public static AdminUIConfig.Action getGlobalActionConfig(AdminUIConfig.Type typeConfig, String action) {
