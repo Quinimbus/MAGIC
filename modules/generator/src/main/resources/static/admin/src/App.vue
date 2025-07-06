@@ -14,6 +14,7 @@ import Select from 'primevue/select'
 import DatePicker from 'primevue/datepicker'
 import RadioButton from 'primevue/radiobutton'
 import Checkbox from 'primevue/checkbox'
+import AutoComplete from 'primevue/autocomplete'
 import ConfirmPopup from 'primevue/confirmpopup'
 </script>
 
@@ -32,6 +33,7 @@ import ConfirmPopup from 'primevue/confirmpopup'
   <DatePicker v-show="false" />
   <RadioButton v-show="false" />
   <Checkbox v-show="false" />
+  <AutoComplete v-show="false" />
   <ConfirmPopup />
   <router-view />
 </template>
