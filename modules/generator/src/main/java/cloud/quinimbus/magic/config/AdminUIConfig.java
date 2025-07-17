@@ -88,6 +88,7 @@ public record AdminUIConfig(
             String group,
             Integer orderKey,
             Map<String, Field> fields,
+            Map<String, FieldGroup> fieldGroups,
             Map<String, Action> globalActions,
             Map<String, Action> instanceActions) {
 
@@ -105,7 +106,7 @@ public record AdminUIConfig(
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static record Field(String label, Integer orderKey, Map<String, AllowedValue> allowedValues) {
+    public static record Field(String label, Integer orderKey, String group, Map<String, AllowedValue> allowedValues) {
         public Field {
             if (orderKey == null) {
                 orderKey = Integer.MAX_VALUE;
@@ -134,7 +135,16 @@ public record AdminUIConfig(
     public static record MenuGroup(String label, Integer orderKey) {
         public MenuGroup {
             if (orderKey == null) {
-                orderKey = 0;
+                orderKey = Integer.MAX_VALUE;
+            }
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static record FieldGroup(String label, Integer orderKey) {
+        public FieldGroup {
+            if (orderKey == null) {
+                orderKey = Integer.MAX_VALUE;
             }
         }
     }

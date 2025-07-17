@@ -20,7 +20,8 @@ const {{typeNameLC}}Definition: TypeDefinition = {
             type: FieldType.{{field.fieldType}}{{if weak && field.owningField}},
             owningField: {{field.owningField}}{{end}}{{if field.hiddenInForm}},
             hiddenInForm: true{{end}}{{if field.references != null}},
-            references: "{{field.references}}"{{end}}{{if !field.allowedValues.isEmpty()}},
+            references: "{{field.references}}"{{end}}{{if field.group != null}},
+            group: "{{field.group}}"{{end}}{{if !field.allowedValues.isEmpty()}},
             allowedValues: [{{for allowedValue in field.allowedValues}}
                 {
                     label: "{{allowedValue.label}}",
@@ -39,6 +40,10 @@ const {{typeNameLC}}Definition: TypeDefinition = {
     weak: true,
     owningType: "{{owningType}}"{{end}},{{if hasGroup}}
     group: "{{group}}",{{end}}
+    fieldGroups: new Map([{{for fieldGroup in fieldGroups}}
+        ["{{fieldGroup.key}}", {
+            label: "{{fieldGroup.label}}"
+        }],{{end}}]),
     globalActions: [{{for action in globalActions}}
         {
             key: "{{action.key}}",

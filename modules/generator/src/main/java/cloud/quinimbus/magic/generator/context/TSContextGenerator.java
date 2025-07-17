@@ -15,8 +15,10 @@ import static cloud.quinimbus.magic.util.Strings.*;
 import io.marioslab.basis.template.TemplateContext;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class TSContextGenerator {
@@ -33,6 +35,7 @@ public class TSContextGenerator {
             boolean hiddenInForm,
             String references,
             String enumName,
+            String group,
             List<TSAllowedValue> allowedValues) {}
 
     public static record Action(String key, String label, String icon, RequiredRole requiredRole) {}
@@ -43,7 +46,8 @@ public class TSContextGenerator {
     public static record RequiredRole(boolean anonymous, Set<String> roles) {}
 
     public static record FieldWithConfig(MagicVariableElement field, AdminUIConfig.Field config) {}
-    ;
+
+    public static record FieldGroup(String key, String label) {}
 
     public static TemplateContext createTypeContext(
             AdminUIConfig.Type typeConfig,
@@ -141,6 +145,15 @@ public class TSContextGenerator {
                         })
                         .toList());
         context.set("requiredRoles", requiredRoles(recordElement));
+        context.set(
+                "fieldGroups",
+                typeConfig.fieldGroups().entrySet().stream()
+                        .sorted(Comparator.comparing(
+                                ((Function<Map.Entry<String, AdminUIConfig.FieldGroup>, AdminUIConfig.FieldGroup>)
+                                                Map.Entry::getValue)
+                                        .andThen(AdminUIConfig.FieldGroup::orderKey)))
+                        .map(e -> new FieldGroup(e.getKey(), e.getValue().label()))
+                        .toList());
         return context;
     }
 
@@ -178,6 +191,7 @@ public class TSContextGenerator {
                                                         .findAny()
                                                         .map(MagicClassElement::getSimpleName)
                                                         .orElse("<MissingTypeParameter>"))),
+                f.config().group(),
                 allowedValues(e, f.config()));
     }
 

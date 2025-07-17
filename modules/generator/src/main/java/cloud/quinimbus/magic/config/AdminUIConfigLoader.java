@@ -15,6 +15,7 @@ public class AdminUIConfigLoader {
                 null,
                 Map.of(),
                 Map.of(),
+                Map.of(),
                 Map.of());
         var providedConfig = config.types().get(uncapitalize(name));
         if (providedConfig == null) {
@@ -28,6 +29,7 @@ public class AdminUIConfigLoader {
                 providedConfig.group(),
                 providedConfig.orderKey(),
                 providedConfig.fields() == null ? defaultConfig.fields() : providedConfig.fields(),
+                providedConfig.fieldGroups() == null ? defaultConfig.fieldGroups() : providedConfig.fieldGroups(),
                 providedConfig.globalActions() == null ? defaultConfig.globalActions() : providedConfig.globalActions(),
                 providedConfig.instanceActions() == null
                         ? defaultConfig.instanceActions()
@@ -38,10 +40,11 @@ public class AdminUIConfigLoader {
         var fc = typeConfig
                 .fields()
                 .getOrDefault(
-                        field, new cloud.quinimbus.magic.config.AdminUIConfig.Field(capitalize(field), null, null));
+                        field,
+                        new cloud.quinimbus.magic.config.AdminUIConfig.Field(capitalize(field), null, null, null));
         if (fc.label() == null || fc.label().isBlank()) {
             fc = new cloud.quinimbus.magic.config.AdminUIConfig.Field(
-                    capitalize(field), fc.orderKey(), fc.allowedValues());
+                    capitalize(field), fc.orderKey(), fc.group(), fc.allowedValues());
         }
         return fc;
     }

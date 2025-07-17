@@ -16,6 +16,7 @@ import RadioButton from 'primevue/radiobutton'
 import Checkbox from 'primevue/checkbox'
 import AutoComplete from 'primevue/autocomplete'
 import ConfirmPopup from 'primevue/confirmpopup'
+import { Tab, TabList, TabPanel, TabPanels, Tabs } from 'primevue'
 </script>
 
 <template>
@@ -34,6 +35,14 @@ import ConfirmPopup from 'primevue/confirmpopup'
   <RadioButton v-show="false" />
   <Checkbox v-show="false" />
   <AutoComplete v-show="false" />
+  <Tabs value="0" v-show="false">
+    <TabList>
+      <Tab value="0" />
+    </TabList>
+    <TabPanels>
+      <TabPanel value="0" />
+    </TabPanels>
+  </Tabs>
   <ConfirmPopup />
   <router-view />
 </template>
