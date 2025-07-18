@@ -36,7 +36,8 @@ public class TSContextGenerator {
             String references,
             String enumName,
             String group,
-            List<TSAllowedValue> allowedValues) {}
+            List<TSAllowedValue> allowedValues,
+            String tableColumnVisibility) {}
 
     public static record Action(String key, String label, String icon, RequiredRole requiredRole) {}
 
@@ -192,7 +193,8 @@ public class TSContextGenerator {
                                                         .map(MagicClassElement::getSimpleName)
                                                         .orElse("<MissingTypeParameter>"))),
                 f.config().group(),
-                allowedValues(e, f.config()));
+                allowedValues(e, f.config()),
+                f.config().table().visibility().name());
     }
 
     private static String toTSType(MagicClassElement classElement, String name, MagicClassElement... typeParameter) {

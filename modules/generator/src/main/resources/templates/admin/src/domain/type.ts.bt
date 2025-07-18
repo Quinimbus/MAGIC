@@ -1,4 +1,4 @@
-import { {{if containsBinary}}type EmbeddableBinary, {{end}}Entity, FieldType, type TypeDefinition, DefaultField, DefaultTypeDefinition } from '@quinimbus/admin-ui'
+import { {{if containsBinary}}type EmbeddableBinary, {{end}}Entity, FieldType, FieldTableColumnVisibility, type TypeDefinition, DefaultField, DefaultTypeDefinition } from '@quinimbus/admin-ui'
 import {{typeNameLCPlural}}View from '@/views/{{typeNameUCPlural}}ListView.vue'
 
 export class {{typeNameUC}} extends Entity<{{typeNameUC}}> {
@@ -27,7 +27,10 @@ const {{typeNameLC}}Definition: TypeDefinition = {
                     label: "{{allowedValue.label}}",
                     key: "{{allowedValue.key}}"
                 },{{end}}
-            ]{{end}}
+            ]{{end}},{{if field.tableColumnVisibility != "ALWAYS"}}
+            table: {
+                visibility: FieldTableColumnVisibility.{{field.tableColumnVisibility}}
+            }{{end}}
         },{{end}}
     ],
     keyField: "{{keyField}}",

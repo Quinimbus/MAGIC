@@ -106,7 +106,12 @@ public record AdminUIConfig(
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static record Field(String label, Integer orderKey, String group, Map<String, AllowedValue> allowedValues) {
+    public static record Field(
+            String label,
+            Integer orderKey,
+            String group,
+            Map<String, AllowedValue> allowedValues,
+            FieldTableConfig table) {
         public Field {
             if (orderKey == null) {
                 orderKey = Integer.MAX_VALUE;
@@ -114,11 +119,30 @@ public record AdminUIConfig(
             if (allowedValues == null) {
                 allowedValues = Map.of();
             }
+            if (table == null) {
+                table = new cloud.quinimbus.magic.config.AdminUIConfig.FieldTableConfig(null);
+            }
         }
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static record AllowedValue(String label) {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static record FieldTableConfig(FieldTableColumnVisibility visibility) {
+        public FieldTableConfig {
+            if (visibility == null) {
+                visibility = FieldTableColumnVisibility.ALWAYS;
+            }
+        }
+    }
+
+    public static enum FieldTableColumnVisibility {
+        ALWAYS,
+        NEVER,
+        DEFAULT_VISIBLE,
+        DEFAULT_HIDDEN
+    }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static record Action(String label, String icon) {

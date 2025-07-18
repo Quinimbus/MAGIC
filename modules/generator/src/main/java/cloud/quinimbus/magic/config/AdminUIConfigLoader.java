@@ -41,10 +41,11 @@ public class AdminUIConfigLoader {
                 .fields()
                 .getOrDefault(
                         field,
-                        new cloud.quinimbus.magic.config.AdminUIConfig.Field(capitalize(field), null, null, null));
+                        new cloud.quinimbus.magic.config.AdminUIConfig.Field(
+                                capitalize(field), null, null, null, null));
         if (fc.label() == null || fc.label().isBlank()) {
             fc = new cloud.quinimbus.magic.config.AdminUIConfig.Field(
-                    capitalize(field), fc.orderKey(), fc.group(), fc.allowedValues());
+                    capitalize(field), fc.orderKey(), fc.group(), fc.allowedValues(), fc.table());
         }
         return fc;
     }
