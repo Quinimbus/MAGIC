@@ -111,7 +111,8 @@ public record AdminUIConfig(
             Integer orderKey,
             String group,
             Map<String, AllowedValue> allowedValues,
-            FieldTableConfig table) {
+            FieldTableConfig table,
+            boolean multilineText) {
         public Field {
             if (orderKey == null) {
                 orderKey = Integer.MAX_VALUE;

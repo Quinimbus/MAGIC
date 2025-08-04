@@ -16,6 +16,7 @@ import RadioButton from 'primevue/radiobutton'
 import Checkbox from 'primevue/checkbox'
 import AutoComplete from 'primevue/autocomplete'
 import ConfirmPopup from 'primevue/confirmpopup'
+import Textarea from 'primevue/textarea';
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from 'primevue'
 </script>
 
@@ -35,6 +36,7 @@ import { Tab, TabList, TabPanel, TabPanels, Tabs } from 'primevue'
   <RadioButton v-show="false" />
   <Checkbox v-show="false" />
   <AutoComplete v-show="false" />
+  <Textarea v-show="false" />
   <Tabs value="0" v-show="false">
     <TabList>
       <Tab value="0" />

@@ -37,7 +37,8 @@ public class TSContextGenerator {
             String enumName,
             String group,
             List<TSAllowedValue> allowedValues,
-            String tableColumnVisibility) {}
+            String tableColumnVisibility,
+            boolean multilineText) {}
 
     public static record Action(String key, String label, String icon, RequiredRole requiredRole) {}
 
@@ -194,7 +195,8 @@ public class TSContextGenerator {
                                                         .orElse("<MissingTypeParameter>"))),
                 f.config().group(),
                 allowedValues(e, f.config()),
-                f.config().table().visibility().name());
+                f.config().table().visibility().name(),
+                f.config().multilineText());
     }
 
     private static String toTSType(MagicClassElement classElement, String name, MagicClassElement... typeParameter) {

@@ -30,7 +30,8 @@ const {{typeNameLC}}Definition: TypeDefinition = {
             ]{{end}},{{if field.tableColumnVisibility != "ALWAYS"}}
             table: {
                 visibility: FieldTableColumnVisibility.{{field.tableColumnVisibility}}
-            }{{end}}
+            }{{end}}{{if field.multilineText}},
+            multilineText: true{{end}}
         },{{end}}
     ],
     keyField: "{{keyField}}",
