@@ -65,7 +65,7 @@ public class AdminUIConfigLoader {
 
     public static AdminUIConfig.Action getInstanceActionConfig(AdminUIConfig.Type typeConfig, String action) {
         var config = typeConfig
-                .globalActions()
+                .instanceActions()
                 .getOrDefault(action, new AdminUIConfig.Action("Action: " + action, "cog-play"));
         if (config.icon() == null || config.icon().isEmpty()) {
             config = config.withIcon("cog-play");

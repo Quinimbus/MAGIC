@@ -383,10 +383,11 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                         "Call the global type action %s of type %s".formatted(definition.name(), name)))
                 .addAnnotation(emptyResponse("204"))
                 .addParameter(injectUriInfo())
-                .addCode(
-                        "this.findEntityById(uriInfo).ifPresentOrElse($L::$L, () -> {throw new WebApplicationException(Response.Status.NOT_FOUND);});",
+                .addStatement(
+                        "this.findEntityById(uriInfo).ifPresentOrElse($L::$L, () -> {throw new $T(Response.Status.NOT_FOUND);})",
                         uncapitalize(definition.type().simpleName()),
-                        definition.method().name());
+                        definition.method().name(),
+                        Jakarta.RS_WEBAPPLICATIONEXCEPTION);
         if (weak()) {
             spec.addAnnotation(ownerIdPathParameter());
         }
