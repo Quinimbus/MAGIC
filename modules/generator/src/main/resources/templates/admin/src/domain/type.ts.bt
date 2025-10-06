@@ -27,7 +27,7 @@ const {{typeNameLC}}Definition: TypeDefinition = {
                     label: "{{allowedValue.label}}",
                     key: "{{allowedValue.key}}"
                 },{{end}}
-            ]{{end}},{{if field.tableColumnVisibility != "ALWAYS"}}
+            ]{{end}}{{if field.tableColumnVisibility != "ALWAYS"}},
             table: {
                 visibility: FieldTableColumnVisibility.{{field.tableColumnVisibility}}
             }{{end}}{{if field.multilineText}},
