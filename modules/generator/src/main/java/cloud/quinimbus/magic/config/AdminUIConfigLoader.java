@@ -1,7 +1,8 @@
 package cloud.quinimbus.magic.config;
 
-import cloud.quinimbus.common.tools.IDs;
 import static cloud.quinimbus.magic.util.Strings.*;
+
+import cloud.quinimbus.common.tools.IDs;
 import java.util.Map;
 
 public class AdminUIConfigLoader {

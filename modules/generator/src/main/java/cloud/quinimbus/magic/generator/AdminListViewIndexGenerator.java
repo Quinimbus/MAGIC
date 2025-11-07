@@ -1,8 +1,9 @@
 package cloud.quinimbus.magic.generator;
 
+import static cloud.quinimbus.magic.util.Strings.*;
+
 import cloud.quinimbus.magic.config.AdminUIConfig;
 import cloud.quinimbus.magic.elements.MagicClassElement;
-import static cloud.quinimbus.magic.util.Strings.*;
 import cloud.quinimbus.magic.util.TemplateRenderer;
 import io.marioslab.basis.template.TemplateContext;
 import java.nio.file.Path;

@@ -1,5 +1,7 @@
 package cloud.quinimbus.magic.generator;
 
+import static cloud.quinimbus.magic.util.Strings.*;
+
 import cloud.quinimbus.common.tools.IDs;
 import cloud.quinimbus.common.tools.Records;
 import cloud.quinimbus.magic.classnames.Jakarta;
@@ -11,7 +13,6 @@ import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
 import cloud.quinimbus.magic.spec.MagicTypeSpec;
-import static cloud.quinimbus.magic.util.Strings.*;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -268,17 +269,13 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                     .addAnnotation(AnnotationSpec.builder(Jakarta.RS_CONTEXT).build())
                     .build());
             spec.addAnnotation(ownerIdPathParameter());
-            code =
-                    """
-                    return this.getByProperty(uriInfo, %s, this.repository::findAllBy%s);
-                    """
-                            .formatted(ve.getSimpleName(), capitalize(ve.getSimpleName()));
+            code = """
+                   return this.getByProperty(uriInfo, %s, this.repository::findAllBy%s);
+                   """.formatted(ve.getSimpleName(), capitalize(ve.getSimpleName()));
         } else {
-            code =
-                    """
-                    return this.getByProperty(%s, this.repository::findAllBy%s);
-                    """
-                            .formatted(ve.getSimpleName(), capitalize(ve.getSimpleName()));
+            code = """
+                   return this.getByProperty(%s, this.repository::findAllBy%s);
+                   """.formatted(ve.getSimpleName(), capitalize(ve.getSimpleName()));
         }
         spec.addCode(code);
         return spec.build();

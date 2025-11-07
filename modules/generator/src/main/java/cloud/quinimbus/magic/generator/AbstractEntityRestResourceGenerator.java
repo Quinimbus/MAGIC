@@ -1,5 +1,7 @@
 package cloud.quinimbus.magic.generator;
 
+import static cloud.quinimbus.magic.util.Strings.capitalize;
+
 import cloud.quinimbus.common.tools.IDs;
 import cloud.quinimbus.common.tools.Records;
 import cloud.quinimbus.magic.classnames.Jakarta;
@@ -13,7 +15,6 @@ import cloud.quinimbus.magic.elements.MagicAnnotationElement;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.elements.MagicExecutableElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
-import static cloud.quinimbus.magic.util.Strings.capitalize;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -307,9 +308,10 @@ public class AbstractEntityRestResourceGenerator extends RecordEntityBasedGenera
                 .orElseThrow();
         return switch (permissionType) {
             case "ANONYMOUS" -> AnnotationSpec.builder(Jakarta.SEC_PERMIT_ALL).build();
-            case "AUTHENTICATED" -> AnnotationSpec.builder(Jakarta.SEC_ROLES_ALLOWED)
-                    .addMember("value", "$S", "**")
-                    .build();
+            case "AUTHENTICATED" ->
+                AnnotationSpec.builder(Jakarta.SEC_ROLES_ALLOWED)
+                        .addMember("value", "$S", "**")
+                        .build();
             case "ROLES" -> {
                 var spec = AnnotationSpec.builder(Jakarta.SEC_ROLES_ALLOWED);
                 permissionAnno
@@ -318,9 +320,10 @@ public class AbstractEntityRestResourceGenerator extends RecordEntityBasedGenera
                         .forEach(r -> spec.addMember("value", "$S", r));
                 yield spec.build();
             }
-            default -> throw new IllegalArgumentException(
-                    "Unknown permission type %s, did you mix different versions of Quinimbus dependencies?"
-                            .formatted(permissionType));
+            default ->
+                throw new IllegalArgumentException(
+                        "Unknown permission type %s, did you mix different versions of Quinimbus dependencies?"
+                                .formatted(permissionType));
         };
     }
 }

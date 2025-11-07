@@ -1,11 +1,12 @@
 package cloud.quinimbus.magic.generator;
 
+import static cloud.quinimbus.magic.util.Strings.*;
+
 import cloud.quinimbus.common.tools.IDs;
 import cloud.quinimbus.magic.config.AdminUIConfig;
 import cloud.quinimbus.magic.config.AdminUIConfigLoader;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.generator.context.TSContextGenerator;
-import static cloud.quinimbus.magic.util.Strings.*;
 import cloud.quinimbus.magic.util.TemplateRenderer;
 import java.nio.file.Path;
 import java.util.List;

@@ -1,5 +1,7 @@
 package cloud.quinimbus.magic.generator.context;
 
+import static cloud.quinimbus.magic.util.Strings.*;
+
 import cloud.quinimbus.common.tools.IDs;
 import cloud.quinimbus.magic.classnames.QuiNimbusBinarystore;
 import cloud.quinimbus.magic.classnames.QuiNimbusCommon;
@@ -11,7 +13,6 @@ import cloud.quinimbus.magic.elements.MagicVariableElement;
 import cloud.quinimbus.magic.generator.RecordContextActionDefinition;
 import cloud.quinimbus.magic.generator.RecordInstanceContextActionDefinition;
 import cloud.quinimbus.magic.util.Strings;
-import static cloud.quinimbus.magic.util.Strings.*;
 import io.marioslab.basis.template.TemplateContext;
 import java.util.Comparator;
 import java.util.List;
@@ -284,15 +285,17 @@ public class TSContextGenerator {
         return switch (permissionType) {
             case "ANONYMOUS" -> new RequiredRole(true, Set.of());
             case "AUTHENTICATED" -> new RequiredRole(false, Set.of());
-            case "ROLES" -> new RequiredRole(
-                    false,
-                    permissionAnno
-                            .<List<String>>getElementValue("roles")
-                            .map(Set::copyOf)
-                            .orElseThrow());
-            default -> throw new IllegalArgumentException(
-                    "Unknown permission type %s, did you mix different versions of Quinimbus dependencies?"
-                            .formatted(permissionType));
+            case "ROLES" ->
+                new RequiredRole(
+                        false,
+                        permissionAnno
+                                .<List<String>>getElementValue("roles")
+                                .map(Set::copyOf)
+                                .orElseThrow());
+            default ->
+                throw new IllegalArgumentException(
+                        "Unknown permission type %s, did you mix different versions of Quinimbus dependencies?"
+                                .formatted(permissionType));
         };
     }
 

@@ -18,39 +18,33 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Inlines({
     @Inline(
             name = "my.pack.MyTestClass",
-            source = {
-                """
-                package my.pack;
+            source = {"""
+                      package my.pack;
 
-                public class MyTestClass {
-                    private final String field;
-                }
-                """
-            }),
+                      public class MyTestClass {
+                          private final String field;
+                      }
+                      """}),
     @Inline(
             name = "my.pack.MyTestEnum",
-            source = {
-                """
-                package my.pack;
+            source = {"""
+                      package my.pack;
 
-                public enum MyTestEnum {
-                    A, B, C
-                }
-                """
-            }),
+                      public enum MyTestEnum {
+                          A, B, C
+                      }
+                      """}),
     @Inline(
             name = "my.pack.MyTestClassWithGenericField",
-            source = {
-                """
-                package my.pack;
+            source = {"""
+                      package my.pack;
 
-                import java.util.List;
+                      import java.util.List;
 
-                public class MyTestClassWithGenericField {
-                    private final List<String> list;
-                }
-                """
-            })
+                      public class MyTestClassWithGenericField {
+                          private final List<String> list;
+                      }
+                      """})
 })
 @Generation(
         retain = true,

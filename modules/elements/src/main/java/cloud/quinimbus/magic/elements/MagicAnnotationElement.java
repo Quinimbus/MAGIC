@@ -51,18 +51,20 @@ public class MagicAnnotationElement {
                 .map(Map.Entry::getValue)
                 .map(e -> (T)
                         switch (e.getValue()) {
-                            case DeclaredType type -> new MagicClassElement(
-                                    (TypeElement) type.asElement(), this.elementUtils, this.typeUtils);
-                            case AnnotationMirror mirror -> new MagicAnnotationElement(
-                                    mirror, this.elementUtils, this.typeUtils);
-                            case VariableElement variableElement -> new MagicVariableElement(
-                                    variableElement, this.elementUtils, this.typeUtils);
-                            case List<?> list -> list.stream()
-                                    .map(le -> switch (le) {
-                                        case AnnotationValue av -> av.getValue();
-                                        default -> le;
-                                    })
-                                    .toList();
+                            case DeclaredType type ->
+                                new MagicClassElement(
+                                        (TypeElement) type.asElement(), this.elementUtils, this.typeUtils);
+                            case AnnotationMirror mirror ->
+                                new MagicAnnotationElement(mirror, this.elementUtils, this.typeUtils);
+                            case VariableElement variableElement ->
+                                new MagicVariableElement(variableElement, this.elementUtils, this.typeUtils);
+                            case List<?> list ->
+                                list.stream()
+                                        .map(le -> switch (le) {
+                                            case AnnotationValue av -> av.getValue();
+                                            default -> le;
+                                        })
+                                        .toList();
                             default -> e.getValue();
                         })
                 .findFirst();

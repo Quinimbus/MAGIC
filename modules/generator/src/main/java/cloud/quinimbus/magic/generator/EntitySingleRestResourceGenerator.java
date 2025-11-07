@@ -1,5 +1,7 @@
 package cloud.quinimbus.magic.generator;
 
+import static cloud.quinimbus.magic.util.Strings.*;
+
 import cloud.quinimbus.common.tools.IDs;
 import cloud.quinimbus.common.tools.Records;
 import cloud.quinimbus.magic.classnames.Jakarta;
@@ -10,7 +12,6 @@ import cloud.quinimbus.magic.classnames.QuiNimbusRest;
 import cloud.quinimbus.magic.elements.MagicClassElement;
 import cloud.quinimbus.magic.elements.MagicVariableElement;
 import cloud.quinimbus.magic.spec.MagicTypeSpec;
-import static cloud.quinimbus.magic.util.Strings.*;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -167,9 +168,7 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .addCode(CodeBlock.of(
                         """
                         return new $T(this::findEntityById, $L);
-                        """,
-                        resourceClass,
-                        uncapitalize(repository(child).simpleName())))
+                        """, resourceClass, uncapitalize(repository(child).simpleName())))
                 .build();
     }
 
@@ -183,9 +182,7 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .addCode(CodeBlock.of(
                         """
                         return new $T(this::findEntityById, $L);
-                        """,
-                        resourceClass,
-                        uncapitalize(repository(child).simpleName())))
+                        """, resourceClass, uncapitalize(repository(child).simpleName())))
                 .build();
     }
 

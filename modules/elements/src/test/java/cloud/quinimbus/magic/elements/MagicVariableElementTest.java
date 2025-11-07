@@ -12,18 +12,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(ToolsExtension.class)
 @Inline(
         name = "my.pack.MyTestClass",
-        source = {
-            """
-            package my.pack;
+        source = {"""
+                  package my.pack;
 
-            import java.util.List;
+                  import java.util.List;
 
-            public class MyTestClass {
-                private final String field;
-                private final List<String> listField;
-            }
-            """
-        })
+                  public class MyTestClass {
+                      private final String field;
+                      private final List<String> listField;
+                  }
+                  """})
 @Generation(
         retain = true,
         classes = "target/elementary/generated-classes",
