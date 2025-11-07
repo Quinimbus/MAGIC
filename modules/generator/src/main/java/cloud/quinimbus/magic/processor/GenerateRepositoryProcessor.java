@@ -15,7 +15,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
 
 @SupportedAnnotationTypes("cloud.quinimbus.magic.annotations.GenerateRepository")
-@SupportedSourceVersion(SourceVersion.RELEASE_24)
+@SupportedSourceVersion(SourceVersion.RELEASE_25)
 public class GenerateRepositoryProcessor extends MagicClassProcessor {
 
     @Override
