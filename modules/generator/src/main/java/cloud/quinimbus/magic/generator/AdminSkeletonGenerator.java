@@ -92,6 +92,7 @@ public class AdminSkeletonGenerator {
         context.set("apptitle", config.app().name());
         context.set("appversion", config.app().version());
         context.set("oidcActive", oidcActive);
+        context.set("backendBasePath", config.backend().basePath());
         templateRenderer.generateFromTemplate("src/initialState.ts", context);
     }
 

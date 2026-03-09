@@ -5,11 +5,19 @@ import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record AdminUIConfig(
-        App app, Map<String, Type> types, Dependencies dependencies, Oidc oidc, Map<String, MenuGroup> menugroups) {
+        App app,
+        Backend backend,
+        Map<String, Type> types,
+        Dependencies dependencies,
+        Oidc oidc,
+        Map<String, MenuGroup> menugroups) {
 
     public AdminUIConfig {
         if (app == null) {
             app = new App(null, null, null);
+        }
+        if (backend == null) {
+            backend = new Backend(null);
         }
         if (types == null) {
             types = Map.of();
@@ -62,6 +70,16 @@ public record AdminUIConfig(
             }
             if (title == null || title.isBlank()) {
                 title = name;
+            }
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static record Backend(String basePath) {
+
+        public Backend {
+            if (basePath == null || basePath.isBlank()) {
+                basePath = "http://localhost:8080";
             }
         }
     }

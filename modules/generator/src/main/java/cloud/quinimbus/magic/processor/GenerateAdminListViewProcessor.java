@@ -73,7 +73,7 @@ public class GenerateAdminListViewProcessor extends MagicClassProcessor {
                     config = mapper.readValue(is, AdminUIConfig.class);
                 }
             } else {
-                config = new AdminUIConfig(null, null, null, null, null);
+                config = new AdminUIConfig(null, null, null, null, null, null);
             }
             var outPath = rootPath.resolve("target/magic/admin-ui/");
             srcPath = outPath.resolve("src");

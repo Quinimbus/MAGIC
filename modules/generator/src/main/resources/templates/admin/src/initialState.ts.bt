@@ -4,7 +4,7 @@ import entityTypeDefinitions from "./domain";
 
 export default function initialState(pinia: Pinia) {
     const appConfig = useAppConfigStore(pinia);
-    appConfig.setBasePath("http://localhost:8080");
+    appConfig.setBasePath("{{backendBasePath}}");
     appConfig.setName("{{apptitle}}");
     appConfig.setOidcActive({{oidcActive}});
     appConfig.setVersion("{{appversion}}");
