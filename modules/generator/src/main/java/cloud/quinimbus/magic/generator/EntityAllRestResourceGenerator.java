@@ -70,6 +70,7 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                 .map(e -> FieldSpec.builder(
                                 e.type(), uncapitalize(e.type().simpleName()), Modifier.PRIVATE, Modifier.FINAL)
                         .build())
+                .distinct()
                 .forEach(allResourceTypeBuilder::addField);
         this.recordElement
                 .findFieldsAnnotatedWith(QuiNimbusCommon.SEARCHABLE_ANNOTATION_NAME)
@@ -106,7 +107,7 @@ public class EntityAllRestResourceGenerator extends AbstractEntityRestResourceGe
                                 .build()),
                         recordContextActionDefinitions.stream().map(e -> ParameterSpec.builder(
                                         e.type(), uncapitalize(e.type().simpleName()))
-                                .build()))
+                                .build()).distinct())
                 .distinct()
                 .toList();
         var constructor = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);

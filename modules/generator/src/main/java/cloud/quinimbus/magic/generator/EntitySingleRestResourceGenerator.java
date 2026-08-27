@@ -88,6 +88,7 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                 .map(e -> FieldSpec.builder(
                                 e.type(), uncapitalize(e.type().simpleName()), Modifier.PRIVATE, Modifier.FINAL)
                         .build())
+                .distinct()
                 .forEach(singleResourceTypeBuilder::addField);
         this.recordElement
                 .findFieldsOfType(QuiNimbusBinarystore.EMBEDDABLE_BINARY)
@@ -131,7 +132,7 @@ public class EntitySingleRestResourceGenerator extends AbstractEntityRestResourc
                                 .build()),
                         recordInstanceContextActionDefinitions.stream().map(e -> ParameterSpec.builder(
                                         e.type(), uncapitalize(e.type().simpleName()))
-                                .build()))
+                                .build()).distinct())
                 .reduce(Stream::concat)
                 .map(Stream::toList)
                 .orElseGet(List::of);
